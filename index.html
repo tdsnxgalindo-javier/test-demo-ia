@@ -1,0 +1,2885 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Gestion de Oportunidades Comerciales</title>
+  <script src="./dashboard-core.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+  <style>
+    :root {
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #172b4d;
+      background: #eff6fc;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: #eff6fc;
+    }
+
+    button, input, select { font: inherit; }
+    button, a, input, select { -webkit-tap-highlight-color: transparent; }
+
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 3px solid #65a9e8;
+      outline-offset: 2px;
+    }
+
+    .topbar {
+      background: #002050;
+      color: #fff;
+    }
+
+    .topbar-inner, .page {
+      width: min(100% - 2rem, 80rem);
+      margin: 0 auto;
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      min-height: 5rem;
+      padding: .8rem 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 2.7rem;
+      height: 2.7rem;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: .65rem;
+      background: #0078d4;
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1rem, 2.5vw, 1.35rem);
+      font-weight: 650;
+      letter-spacing: -.02em;
+    }
+
+    .header-date {
+      color: #d7e9f9;
+      font-size: .9rem;
+      text-align: right;
+      text-transform: capitalize;
+    }
+
+    .page { padding: 1.5rem 0 3rem; }
+
+    .panel {
+      border: 1px solid #d6e2ee;
+      border-radius: .8rem;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,32,80,.055);
+    }
+
+    .connection-panel {
+      display: grid;
+      grid-template-columns: minmax(13rem, 1fr) auto auto;
+      align-items: end;
+      gap: 1rem;
+      padding: 1.15rem;
+    }
+
+    .connection-field { min-width: 0; }
+
+    .connection-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: .65rem;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: .4rem;
+      color: #344563;
+      font-size: .84rem;
+      font-weight: 650;
+    }
+
+    .control {
+      width: 100%;
+      min-height: 2.65rem;
+      padding: .55rem .7rem;
+      border: 1px solid #aebdca;
+      border-radius: .45rem;
+      background: #fff;
+      color: #172b4d;
+    }
+
+    .control:disabled { background: #f3f6f9; color: #66788a; }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .45rem;
+      min-height: 2.55rem;
+      padding: .55rem .85rem;
+      border: 1px solid transparent;
+      border-radius: .45rem;
+      background: #0078d4;
+      color: #fff;
+      font-weight: 650;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color .15s ease, box-shadow .15s ease;
+      white-space: nowrap;
+    }
+
+    .button:hover:not(:disabled) { background: #106ebe; }
+    .button:disabled { cursor: not-allowed; opacity: .52; }
+    .button.secondary { border-color: #b7c8d8; background: #fff; color: #174a75; }
+    .button.secondary:hover:not(:disabled) { background: #f2f8fd; }
+    .button.danger { border-color: #d13438; background: #fff; color: #a4262c; }
+    .button.danger:hover:not(:disabled) { background: #fff4f4; }
+    .button.small { min-height: 2.15rem; padding: .35rem .6rem; font-size: .84rem; }
+    .button.icon-only { width: 2.4rem; padding: .4rem; }
+
+    .button svg, .inline-icon svg {
+      width: 1rem;
+      height: 1rem;
+      flex: 0 0 auto;
+    }
+
+    .text-link {
+      color: #075a9c;
+      font-weight: 650;
+      text-decoration: underline;
+      text-underline-offset: .15em;
+    }
+
+    .text-link[aria-disabled="true"] {
+      color: #7a8998;
+      pointer-events: none;
+      text-decoration: none;
+    }
+
+    .connection-meta {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem 1rem;
+      min-height: 1.5rem;
+      color: #526579;
+      font-size: .88rem;
+    }
+
+    .connection-state { display: inline-flex; align-items: center; gap: .45rem; }
+    .connection-state::before {
+      width: .55rem;
+      height: .55rem;
+      border-radius: 50%;
+      background: #8998a7;
+      content: "";
+    }
+
+    .connection-state.online::before { background: #107c10; }
+    .connection-state.error::before { background: #d13438; }
+    .account-label { color: #526579; overflow-wrap: anywhere; }
+
+    .message {
+      display: none;
+      margin: 1rem 0 0;
+      padding: .75rem .9rem;
+      border: 1px solid #d6e2ee;
+      border-radius: .55rem;
+      background: #fff;
+      color: #344563;
+    }
+
+    .message.visible { display: block; }
+    .message.error { border-color: #e6a3a3; background: #fff6f6; color: #8b1e22; }
+    .message.success { border-color: #9dcaa3; background: #f3fbf4; color: #165b20; }
+    .message.warning { border-color: #f2cb76; background: #fff9eb; color: #755000; }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin: 1.65rem 0 .85rem;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      color: #163d62;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .section-heading p {
+      margin: .25rem 0 0;
+      color: #63778b;
+      font-size: .88rem;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: .85rem;
+    }
+
+    .kpi-card { padding: 1rem 1.1rem; }
+    .kpi-label { margin: 0; color: #5a6f83; font-size: .85rem; font-weight: 600; }
+    .kpi-value { margin: .5rem 0 0; color: #123b60; font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 750; }
+    .kpi-accent { border-top: 3px solid #0078d4; }
+    .kpi-accent.green { border-top-color: #107c10; }
+    .kpi-accent.navy { border-top-color: #002050; }
+    .kpi-accent.gold { border-top-color: #c19c00; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(17rem, 1fr) minmax(0, 2fr);
+      align-items: start;
+      gap: 1rem;
+      margin-top: 1.65rem;
+    }
+
+    .form-panel, .list-panel { padding: 1.15rem; }
+    .panel-title {
+      margin: 0;
+      color: #163d62;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .panel-intro {
+      margin: .35rem 0 1rem;
+      color: #63778b;
+      font-size: .85rem;
+      line-height: 1.45;
+    }
+
+    .form-grid { display: grid; gap: .85rem; }
+    .form-field { min-width: 0; }
+    .form-field .help {
+      display: block;
+      margin-top: .3rem;
+      color: #66788a;
+      font-size: .77rem;
+    }
+
+    fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+    fieldset:disabled { opacity: .72; }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .45rem;
+      margin: 0 0 1rem;
+    }
+
+    .filter-button {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      min-height: 2.15rem;
+      padding: .35rem .65rem;
+      border: 1px solid #bdcbd8;
+      border-radius: 999px;
+      background: #fff;
+      color: #344563;
+      font-size: .82rem;
+      cursor: pointer;
+    }
+
+    .filter-button[aria-pressed="true"] {
+      border-color: #0078d4;
+      background: #e8f3fc;
+      color: #075a9c;
+      font-weight: 700;
+    }
+
+    .filter-count {
+      display: inline-grid;
+      min-width: 1.35rem;
+      height: 1.35rem;
+      place-items: center;
+      border-radius: 999px;
+      background: rgba(23,43,77,.08);
+      font-size: .72rem;
+      font-weight: 700;
+    }
+
+    .list-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: .65rem;
+      margin-bottom: .85rem;
+    }
+
+    .view-toggle { display: inline-flex; gap: .35rem; }
+    .view-toggle .button[aria-pressed="true"] { border-color: #0078d4; background: #e8f3fc; color: #075a9c; }
+    .results-meta { color: #63778b; font-size: .82rem; }
+
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid #d8e2eb;
+      border-radius: .55rem;
+      overscroll-behavior-x: contain;
+    }
+
+    table {
+      width: 100%;
+      min-width: 850px;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td { padding: .72rem .65rem; border-bottom: 1px solid #e5ebf0; vertical-align: middle; }
+    th { background: #f5f8fb; color: #526579; font-size: .76rem; font-weight: 700; white-space: nowrap; }
+    td { color: #23384d; font-size: .85rem; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #f8fbfe; }
+    .cell-project { min-width: 9rem; font-weight: 650; }
+    .cell-actions { white-space: nowrap; }
+    .row-actions { display: flex; flex-wrap: wrap; gap: .35rem; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.55rem;
+      padding: .18rem .55rem;
+      border-radius: 999px;
+      background: #e8f3fc;
+      color: #075a9c;
+      font-size: .75rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-badge.won { background: #e5f4e7; color: #166b24; }
+    .status-badge.lost { background: #fdecec; color: #a4262c; }
+    .status-badge.negotiation { background: #fff4ce; color: #725b00; }
+    .status-badge.prospect { background: #e8f3fc; color: #075a9c; }
+
+    .row-select {
+      width: 100%;
+      min-width: 8rem;
+      min-height: 2.2rem;
+      padding: .35rem .45rem;
+      border: 1px solid #c5d1dc;
+      border-radius: .4rem;
+      background: #fff;
+      color: #23384d;
+      font-size: .8rem;
+    }
+
+    .empty-state {
+      padding: 2rem 1rem;
+      border: 1px dashed #b5c5d4;
+      border-radius: .6rem;
+      color: #5e7184;
+      text-align: center;
+    }
+
+    .empty-state strong { display: block; margin-bottom: .35rem; color: #344563; }
+    .card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+    .opportunity-card { padding: .9rem; border: 1px solid #d8e2eb; border-radius: .6rem; background: #fff; }
+    .card-top { display: flex; justify-content: space-between; align-items: start; gap: .6rem; }
+    .card-title { margin: 0; color: #123b60; font-size: 1rem; font-weight: 700; overflow-wrap: anywhere; }
+    .card-client { margin: .25rem 0 .75rem; color: #5b6e80; font-size: .84rem; }
+    .card-budget { margin: 0 0 .8rem; color: #123b60; font-size: 1.25rem; font-weight: 750; }
+    .card-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; margin-bottom: .8rem; }
+    .card-detail-label { display: block; color: #738496; font-size: .7rem; }
+    .card-detail-value { display: block; margin-top: .15rem; color: #344563; font-size: .82rem; overflow-wrap: anywhere; }
+    .card-control { display: grid; gap: .55rem; margin: .7rem 0; }
+    .card-control label { display: grid; grid-template-columns: 6rem minmax(0,1fr); align-items: center; gap: .4rem; color: #526579; font-size: .78rem; }
+    .card-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .75rem; }
+
+    .documents-panel { margin-top: 1.2rem; padding: 1.15rem; }
+    .documents-toolbar {
+      display: grid;
+      grid-template-columns: minmax(14rem, 1fr) auto;
+      align-items: end;
+      gap: .8rem;
+      margin-top: .85rem;
+    }
+
+    .documents-context { margin: .7rem 0 0; color: #344563; font-size: .9rem; }
+    .document-summary { margin: .65rem 0 0; color: #526579; font-size: .86rem; }
+    .documents-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(18rem, .8fr);
+      gap: 1rem;
+      margin-top: 1rem;
+      align-items: start;
+    }
+    .documents-list-panel, .document-review-panel {
+      min-width: 0;
+      padding: .9rem;
+      border: 1px solid #d6e2ee;
+      border-radius: .6rem;
+      background: #fff;
+    }
+    .documents-list-panel h3, .document-review-panel h3 {
+      margin: 0 0 .75rem;
+      color: #123b60;
+      font-size: 1rem;
+    }
+    .document-upload-form { margin-top: .85rem; }
+    .document-upload-fields {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: .7rem;
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+    .document-help, .document-audit, .document-assignee {
+      margin: .45rem 0 0;
+      color: #64788b;
+      font-size: .8rem;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+    .document-list-scroll { overflow-x: auto; }
+    .document-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    .document-table th, .document-table td {
+      padding: .6rem .5rem;
+      border-bottom: 1px solid #e1e8ef;
+      text-align: left;
+      vertical-align: middle;
+    }
+    .document-table th { color: #526579; font-size: .75rem; white-space: nowrap; }
+    .document-name-button {
+      padding: 0;
+      border: 0;
+      background: none;
+      color: #075a9c;
+      text-align: left;
+      text-decoration: underline;
+      text-underline-offset: .15em;
+      cursor: pointer;
+      overflow-wrap: anywhere;
+    }
+    .document-name-button:disabled { color: #64788b; text-decoration: none; cursor: default; }
+    .document-status {
+      display: inline-flex;
+      padding: .2rem .48rem;
+      border-radius: 999px;
+      background: #edf2f7;
+      color: #344563;
+      font-size: .74rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .document-status.pending { background: #fff4ce; color: #7a5a00; }
+    .document-status.validated { background: #dff6dd; color: #107c10; }
+    .document-status.rejected { background: #fde7e9; color: #a4262c; }
+    .document-row-actions { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .document-review-form { display: grid; gap: .7rem; }
+    .document-review-form[hidden] { display: none; }
+    .document-review-form textarea { min-height: 7rem; resize: vertical; }
+    .document-review-meta {
+      margin: .3rem 0 0;
+      padding: .7rem;
+      border-radius: .45rem;
+      background: #f5f8fb;
+      color: #526579;
+      font-size: .82rem;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+    .document-disclaimer { margin: .65rem 0 0; color: #64788b; font-size: .78rem; line-height: 1.45; }
+    .document-message { margin-top: .75rem; }
+    .document-empty { padding: .85rem; color: #64788b; font-size: .88rem; }
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .highlight-row { animation: highlight 1.6s ease-out 1; }
+    @keyframes highlight {
+      0% { background: #d9efff; }
+      100% { background: transparent; }
+    }
+
+    @media (max-width: 900px) {
+      .workspace { grid-template-columns: minmax(15rem, 1fr) minmax(0, 1.7fr); }
+      .connection-panel { grid-template-columns: minmax(12rem, 1fr) auto; }
+      .connection-actions { grid-column: 1 / -1; }
+      .connection-meta { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 700px) {
+      .topbar-inner, .page { width: min(100% - 1.2rem, 80rem); }
+      .topbar-inner { min-height: 4.4rem; }
+      .header-date { display: none; }
+      .page { padding-top: 1rem; }
+      .connection-panel { grid-template-columns: 1fr; gap: .75rem; padding: .9rem; }
+      .connection-actions { grid-column: auto; }
+      .connection-meta { grid-column: auto; align-items: start; flex-direction: column; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: .6rem; }
+      .kpi-card { padding: .8rem; }
+      .workspace { grid-template-columns: 1fr; gap: .8rem; margin-top: 1.1rem; }
+      .form-panel, .list-panel, .documents-panel { padding: .9rem; }
+      .section-heading { align-items: start; flex-direction: column; margin-top: 1.2rem; }
+      .documents-toolbar, .documents-layout { grid-template-columns: 1fr; }
+      .document-upload-fields { grid-template-columns: 1fr; }
+      .card-grid { grid-template-columns: 1fr; }
+      .list-toolbar { align-items: start; flex-direction: column; }
+      .filters { gap: .35rem; }
+      .filter-button { font-size: .78rem; }
+      .button { min-height: 2.45rem; }
+    }
+
+    @media (max-width: 390px) {
+      .connection-actions { display: grid; grid-template-columns: 1fr 1fr; }
+      .connection-actions .text-link { grid-column: 1 / -1; }
+      .kpi-value { font-size: 1.2rem; }
+      .card-control label { grid-template-columns: 5.2rem minmax(0,1fr); }
+      .card-actions .button { flex: 1 1 auto; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">O</div>
+        <h1>Gestion de Oportunidades Comerciales</h1>
+      </div>
+      <div id="current-date" class="header-date"></div>
+    </div>
+  </header>
+
+  <main class="page" id="app">
+    <section class="panel connection-panel" aria-label="Conexion con SharePoint">
+      <div class="connection-field">
+        <label class="field-label" for="client-id">ID de aplicacion Entra</label>
+        <input class="control" id="client-id" type="text" inputmode="text" autocomplete="off" spellcheck="false" aria-describedby="client-id-help">
+        <span class="visually-hidden" id="client-id-help">Identificador publico del registro de aplicacion SPA.</span>
+      </div>
+      <div class="connection-actions">
+        <button class="button" type="button" id="connect-button">
+          <i data-lucide="plug-zap" aria-hidden="true"></i>
+          <span>Conectar SharePoint</span>
+        </button>
+        <button class="button secondary" type="button" id="refresh-button" disabled>
+          <i data-lucide="refresh-cw" aria-hidden="true"></i>
+          <span>Actualizar</span>
+        </button>
+        <a class="text-link" id="opportunities-list-link" href="#" aria-disabled="true" tabindex="-1">Abrir lista de oportunidades</a>
+      </div>
+      <div class="connection-meta">
+        <span id="connection-state" class="connection-state" role="status" aria-live="polite">Sin conexion</span>
+        <span id="account-label" class="account-label"></span>
+      </div>
+    </section>
+
+    <div id="app-message" class="message" role="status" aria-live="polite"></div>
+
+    <section aria-labelledby="indicators-title">
+      <div class="section-heading">
+        <div>
+          <h2 id="indicators-title">Resumen comercial</h2>
+          <p>Indicadores calculados sobre todas las oportunidades cargadas.</p>
+        </div>
+      </div>
+      <div class="kpi-grid">
+        <article class="panel kpi-card kpi-accent">
+          <p class="kpi-label">Pipeline total</p>
+          <p class="kpi-value" id="kpi-pipeline">$0</p>
+        </article>
+        <article class="panel kpi-card kpi-accent green">
+          <p class="kpi-label">Ingresos ganados</p>
+          <p class="kpi-value" id="kpi-won">$0</p>
+        </article>
+        <article class="panel kpi-card kpi-accent navy">
+          <p class="kpi-label">Abiertas</p>
+          <p class="kpi-value" id="kpi-open">0</p>
+        </article>
+        <article class="panel kpi-card kpi-accent gold">
+          <p class="kpi-label">Tasa de exito</p>
+          <p class="kpi-value" id="kpi-success">0%</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="workspace" aria-label="Oportunidades">
+      <section class="panel form-panel" aria-labelledby="form-title">
+        <h2 class="panel-title" id="form-title">Nueva oportunidad</h2>
+        <p class="panel-intro">Los datos se guardan en la lista de SharePoint al confirmar el envio.</p>
+        <form id="opportunity-form" novalidate>
+          <fieldset id="opportunity-fields" disabled>
+            <legend class="visually-hidden">Datos de la oportunidad</legend>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="field-label" for="customer">Cliente</label>
+                <input class="control" id="customer" name="Cliente" type="text" maxlength="80" required autocomplete="organization">
+              </div>
+              <div class="form-field">
+                <label class="field-label" for="project">Proyecto</label>
+                <input class="control" id="project" name="Title" type="text" maxlength="120" required>
+              </div>
+              <div class="form-field">
+                <label class="field-label" for="assignee">Asignado a</label>
+                <select class="control" id="assignee" name="AsignadoA" required>
+                  <option value="">Selecciona un miembro</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="field-label" for="budget">Presupuesto (USD)</label>
+                <input class="control" id="budget" name="Presupuesto" type="text" inputmode="decimal" autocomplete="off" required aria-describedby="budget-help">
+                <span class="help" id="budget-help">Usa punto decimal y hasta dos decimales. Se admite 0.</span>
+              </div>
+              <div class="form-field">
+                <label class="field-label" for="new-state">Estado</label>
+                <select class="control" id="new-state" name="Estado" required>
+                  <option value="Prospecto">Prospecto</option>
+                  <option value="Negociación">Negociación</option>
+                  <option value="Ganada">Ganada</option>
+                  <option value="Perdida">Perdida</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="field-label" for="date">Fecha</label>
+                <input class="control" id="date" name="Fecha" type="date" required>
+              </div>
+              <button class="button" type="submit" id="create-button">
+                <i data-lucide="plus" aria-hidden="true"></i>
+                <span>Crear oportunidad</span>
+              </button>
+            </div>
+          </fieldset>
+        </form>
+      </section>
+
+      <section class="panel list-panel" aria-labelledby="opportunities-title">
+        <div class="section-heading" style="margin-top:0">
+          <div>
+            <h2 id="opportunities-title">Oportunidades</h2>
+            <p id="list-subtitle">Conecta SharePoint para cargar los registros.</p>
+          </div>
+        </div>
+        <div class="filters" id="filters" aria-label="Filtrar por estado"></div>
+        <div class="list-toolbar">
+          <div class="results-meta" id="results-meta" role="status" aria-live="polite">Sin oportunidades cargadas</div>
+          <div class="view-toggle" role="group" aria-label="Formato de vista">
+            <button type="button" class="button secondary small" id="view-table" aria-pressed="true" disabled>
+              <i data-lucide="list" aria-hidden="true"></i><span>Tabla</span>
+            </button>
+            <button type="button" class="button secondary small" id="view-cards" aria-pressed="false" disabled>
+              <i data-lucide="layout-grid" aria-hidden="true"></i><span>Tarjetas</span>
+            </button>
+          </div>
+        </div>
+        <div id="opportunities-content" aria-live="polite">
+          <div class="empty-state">
+            <strong>Sin conexion</strong>
+            Conecta SharePoint para consultar las oportunidades. No se muestran datos de ejemplo.
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="panel documents-panel" id="documents-panel" aria-labelledby="documents-title">
+      <div class="section-heading" style="margin-top:0">
+        <div>
+          <h2 id="documents-title">Documentos de oportunidades</h2>
+          <p>Adjunta archivos y registra revisiones manuales. La asignacion documental sigue a la oportunidad y se sincroniza al conectar, actualizar, guardar cambios o antes de cargar; no hay tareas de fondo.</p>
+        </div>
+        <a class="text-link" id="documents-list-link" href="#" aria-disabled="true" tabindex="-1">Abrir lista documental</a>
+      </div>
+      <p class="documents-context" id="documents-context">Selecciona Documentos en una oportunidad para preparar su contexto.</p>
+      <div class="documents-toolbar">
+        <div class="form-field">
+          <label class="field-label" for="document-opportunity">Oportunidad</label>
+          <select class="control" id="document-opportunity" disabled>
+            <option value="">Selecciona una oportunidad</option>
+          </select>
+        </div>
+        <button class="button secondary" type="button" id="refresh-documents-button" disabled>
+          <i data-lucide="refresh-cw" aria-hidden="true"></i><span>Actualizar documentos</span>
+        </button>
+      </div>
+      <p class="document-summary" id="document-summary" role="status" aria-live="polite">Sin oportunidad seleccionada.</p>
+      <div class="message document-message" id="document-message" role="status" aria-live="polite"></div>
+      <form class="document-upload-form" id="document-upload-form">
+        <fieldset class="document-upload-fields" id="document-upload-fields" disabled>
+          <div class="form-field">
+            <label class="field-label" for="document-file">Archivo (máximo 20 MiB)</label>
+            <input class="control" id="document-file" type="file" required aria-describedby="document-upload-help">
+            <span class="document-help" id="document-upload-help">Un archivo por operación. Se admite hasta 20 × 1024 × 1024 bytes.</span>
+          </div>
+          <button class="button" type="submit" id="upload-document-button">
+            <i data-lucide="upload" aria-hidden="true"></i><span>Adjuntar documento</span>
+          </button>
+        </fieldset>
+      </form>
+      <div class="documents-layout">
+        <section class="documents-list-panel" aria-labelledby="documents-list-title">
+          <h3 id="documents-list-title">Documentos</h3>
+          <div id="documents-content" aria-live="polite">
+            <div class="document-empty">Selecciona una oportunidad para consultar sus documentos.</div>
+          </div>
+        </section>
+        <section class="document-review-panel" id="document-review-panel" aria-labelledby="document-review-title">
+          <h3 id="document-review-title">Revision manual</h3>
+          <p class="document-empty" id="document-review-empty">Selecciona el nombre de un archivo para revisar sus metadatos.</p>
+          <form id="document-review-form" class="document-review-form" hidden>
+            <div>
+              <strong id="review-document-name"></strong>
+              <p class="document-assignee" id="review-document-assignee"></p>
+              <p class="document-review-meta" id="review-document-audit"></p>
+            </div>
+            <div class="form-field">
+              <label class="field-label" for="review-status">Estado de validacion</label>
+              <select class="control" id="review-status" required>
+                <option value="" disabled>Selecciona un estado</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Validado">Validado</option>
+                <option value="Rechazado">Rechazado</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="field-label" for="review-observations">Observaciones</label>
+              <textarea class="control" id="review-observations" maxlength="2000" aria-describedby="review-help"></textarea>
+              <span class="document-help" id="review-help">Máximo 2000 caracteres. Para rechazar, indica el motivo.</span>
+            </div>
+            <button class="button" type="submit" id="save-review-button">Guardar validacion</button>
+          </form>
+          <p class="document-disclaimer">La revision es manual y registra metadatos; no analiza el contenido ni acredita firmas, malware o cumplimiento.</p>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const {
+        SynchronizationError,
+        accountFromLogin,
+        buildDocumentReviewFields,
+        createDocumentWithCurrentAssignment,
+        encodedODataLiteral,
+        fetchAttachmentBlob,
+        firstString,
+        getEtag,
+        loadMembers: loadAssignableMembers,
+        normalizedAccount,
+        readAllPages: readAllPagesCore,
+        requireAssignableMember,
+        synchronizeDocumentAssignments: synchronizeAssignmentsCore,
+        uploadAttachmentWithCompensation,
+        validateDocumentFile: validateDocumentFileCore,
+        validateDocumentReview
+      } = window.DashboardCore || {};
+      if (!window.DashboardCore) {
+        throw new Error("No se pudo cargar el modulo local de operaciones del dashboard.");
+      }
+
+      const CONFIG = Object.freeze({
+        SITE_URL: "https://m365x30064847.sharepoint.com/sites/test-demo-ia",
+        TENANT_ID: "29c3ef0e-00a3-4611-b0ee-f5b3d3fffec3",
+        CLIENT_ID: "41a9e13b-df67-49a3-92a0-ad5d2deae89d",
+        SITE_ID: "62e5f87b-2c9e-4eaa-80b3-80995be308a4",
+        WEB_ID: "1a868dd5-4535-4ad4-af11-246cd71a500f",
+        OPPORTUNITIES_LIST_ID: "3fec95fe-c170-4912-901d-d617503445ba",
+        DOCUMENTS_LIST_ID: "6625a6cb-0750-4b25-a66d-17f66d63464e",
+        MEMBER_GROUP_ID: 5,
+        LIST_TITLE: "Oportunidades",
+        DOCUMENTS_LIST_TITLE: "DocumentosOportunidades"
+      });
+
+      const STATUSES = ["Prospecto", "Negociación", "Ganada", "Perdida"];
+      const VALIDATION_STATUSES = ["Pendiente", "Validado", "Rechazado"];
+      const STATUS_FILTERS = ["Todos", ...STATUSES];
+      const MAX_DOCUMENT_SIZE = 20 * 1024 * 1024;
+      const MAX_DOCUMENT_NAME_LENGTH = 180;
+      const GUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const siteUrl = CONFIG.SITE_URL.replace(/\/+$/, "");
+      const apiBase = `${siteUrl}/_api/`;
+      const apiBaseUrl = new URL(apiBase);
+      const sharePointOrigin = new URL(siteUrl).origin;
+      const sharePointScope = `${sharePointOrigin}/AllSites.Write`;
+      const currencyFormatter = new Intl.NumberFormat("es-ES", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      });
+      const dateFormatter = new Intl.DateTimeFormat("es-ES", {
+        dateStyle: "medium",
+        timeZone: "UTC"
+      });
+      const longDateFormatter = new Intl.DateTimeFormat("es-ES", {
+        dateStyle: "full"
+      });
+
+      const dom = {
+        clientId: document.getElementById("client-id"),
+        connect: document.getElementById("connect-button"),
+        refresh: document.getElementById("refresh-button"),
+        connection: document.getElementById("connection-state"),
+        account: document.getElementById("account-label"),
+        message: document.getElementById("app-message"),
+        app: document.getElementById("app"),
+        form: document.getElementById("opportunity-form"),
+        fieldset: document.getElementById("opportunity-fields"),
+        customer: document.getElementById("customer"),
+        project: document.getElementById("project"),
+        assignee: document.getElementById("assignee"),
+        budget: document.getElementById("budget"),
+        newState: document.getElementById("new-state"),
+        date: document.getElementById("date"),
+        filters: document.getElementById("filters"),
+        content: document.getElementById("opportunities-content"),
+        resultsMeta: document.getElementById("results-meta"),
+        subtitle: document.getElementById("list-subtitle"),
+        viewTable: document.getElementById("view-table"),
+        viewCards: document.getElementById("view-cards"),
+        opportunityLink: document.getElementById("opportunities-list-link"),
+        documentsLink: document.getElementById("documents-list-link"),
+        documentsContext: document.getElementById("documents-context"),
+        documentOpportunity: document.getElementById("document-opportunity"),
+        refreshDocuments: document.getElementById("refresh-documents-button"),
+        documentSummary: document.getElementById("document-summary"),
+        documentMessage: document.getElementById("document-message"),
+        documentUploadForm: document.getElementById("document-upload-form"),
+        documentUploadFields: document.getElementById("document-upload-fields"),
+        documentFile: document.getElementById("document-file"),
+        uploadDocumentButton: document.getElementById("upload-document-button"),
+        documentsContent: document.getElementById("documents-content"),
+        reviewEmpty: document.getElementById("document-review-empty"),
+        reviewForm: document.getElementById("document-review-form"),
+        reviewDocumentName: document.getElementById("review-document-name"),
+        reviewDocumentAssignee: document.getElementById("review-document-assignee"),
+        reviewDocumentAudit: document.getElementById("review-document-audit"),
+        reviewStatus: document.getElementById("review-status"),
+        reviewObservations: document.getElementById("review-observations"),
+        saveReviewButton: document.getElementById("save-review-button"),
+        currentDate: document.getElementById("current-date"),
+        pipeline: document.getElementById("kpi-pipeline"),
+        won: document.getElementById("kpi-won"),
+        open: document.getElementById("kpi-open"),
+        success: document.getElementById("kpi-success")
+      };
+
+      const state = {
+        clientId: "",
+        msal: null,
+        msalClientId: "",
+        account: null,
+        authenticated: false,
+        dataReady: false,
+        busy: false,
+        needsRefresh: false,
+        opportunities: [],
+        members: [],
+        filter: "Todos",
+        view: "table",
+        highlightedId: null,
+        selectedDocumentOpportunityId: null,
+        documentItems: [],
+        documentsReady: false,
+        documentsLoading: false,
+        documentsNeedRefresh: false,
+        documentLoadError: "",
+        documentRequestId: 0,
+        selectedDocumentId: null,
+        listInfo: null,
+        digest: null,
+        digestExpiresAt: 0
+      };
+
+      class SharePointError extends Error {
+        constructor(status, message, code) {
+          super(message);
+          this.name = "SharePointError";
+          this.status = status;
+          this.code = code || "";
+        }
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, character => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          "\"": "&quot;",
+          "'": "&#39;"
+        })[character]);
+      }
+
+      function setMessage(message, type = "info") {
+        dom.message.textContent = message;
+        dom.message.className = `message visible${type === "info" ? "" : ` ${type}`}`;
+        dom.message.setAttribute("role", type === "error" ? "alert" : "status");
+      }
+
+      function clearMessage() {
+        dom.message.textContent = "";
+        dom.message.className = "message";
+        dom.message.setAttribute("role", "status");
+      }
+
+      function setConnectionMessage(message, type = "") {
+        dom.connection.textContent = message;
+        dom.connection.className = `connection-state${type ? ` ${type}` : ""}`;
+      }
+
+      function isInteractionRequired(error) {
+        const code = String(error?.errorCode || "").toLowerCase();
+        return code.includes("interaction_required") ||
+          code.includes("login_required") ||
+          code.includes("consent_required") ||
+          error?.name === "InteractionRequiredAuthError";
+      }
+
+      function isUserCancellation(error) {
+        const code = String(error?.errorCode || "").toLowerCase();
+        return code === "user_cancelled" ||
+          code === "user_canceled" ||
+          code === "user_cancelled_error";
+      }
+
+      function currentClientId() {
+        return dom.clientId.value.trim();
+      }
+
+      function redirectUri() {
+        return location.origin + location.pathname;
+      }
+
+      function loadMsalScript() {
+        if (window.msal?.PublicClientApplication) return Promise.resolve();
+        if (window.__msalLoading) return window.__msalLoading;
+
+        window.__msalLoading = new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "https://cdn.jsdelivr.net/npm/@azure/msal-browser@4.27.0/lib/msal-browser.min.js";
+          script.async = true;
+          script.onload = () => {
+            if (window.msal?.PublicClientApplication) {
+              resolve();
+              return;
+            }
+            window.__msalLoading = null;
+            reject(new Error("MSAL Browser se cargo, pero no expuso PublicClientApplication."));
+          };
+          script.onerror = () => {
+            window.__msalLoading = null;
+            reject(new Error("No se pudo cargar MSAL Browser desde jsDelivr."));
+          };
+          document.head.appendChild(script);
+        });
+
+        return window.__msalLoading;
+      }
+
+      async function initializeMsal(clientId, processRedirect = true) {
+        if (!GUID_PATTERN.test(clientId)) {
+          throw new Error("El ID de aplicacion debe ser un GUID valido.");
+        }
+        await loadMsalScript();
+        const application = new window.msal.PublicClientApplication({
+          auth: {
+            clientId,
+            authority: `https://login.microsoftonline.com/${CONFIG.TENANT_ID}`,
+            redirectUri: redirectUri()
+          },
+          cache: {
+            cacheLocation: "sessionStorage",
+            storeAuthStateInCookie: false
+          }
+        });
+        await application.initialize();
+        let response = null;
+        if (processRedirect) {
+          response = await application.handleRedirectPromise();
+        }
+        state.msal = application;
+        state.msalClientId = clientId;
+        return response;
+      }
+
+      function persistPreference(key, value) {
+        try {
+          localStorage.setItem(key, value);
+        } catch (error) {
+          console.warn(`No se pudo guardar la preferencia local "${key}".`, error);
+          setMessage("El navegador no permitio guardar una preferencia local. La aplicacion continua sin persistirla.", "warning");
+        }
+      }
+
+      function restorePreferences() {
+        try {
+          const savedView = localStorage.getItem("vista");
+          state.clientId = CONFIG.CLIENT_ID;
+          state.view = savedView === "cards" ? "cards" : "table";
+        } catch (error) {
+          console.warn("No se pudieron leer las preferencias locales.", error);
+          state.clientId = CONFIG.CLIENT_ID;
+          state.view = "table";
+        }
+        dom.clientId.value = state.clientId;
+      }
+
+      async function acquireAccessToken(account = state.account) {
+        if (!state.msal || !account) {
+          throw new Error("No hay una cuenta autenticada. Pulsa Conectar SharePoint.");
+        }
+        try {
+          const result = await state.msal.acquireTokenSilent({
+            scopes: [sharePointScope],
+            account
+          });
+          if (!result.accessToken) {
+            throw new Error("MSAL no devolvio un token para SharePoint.");
+          }
+          return result.accessToken;
+        } catch (error) {
+          if (isInteractionRequired(error)) {
+            state.authenticated = false;
+            state.dataReady = false;
+            state.needsRefresh = false;
+            render();
+            setConnectionMessage("La sesion requiere interaccion. Pulsa Conectar SharePoint.", "error");
+            throw new Error("Se requiere inicio de sesion o consentimiento interactivo. Vuelve a conectar.");
+          }
+          throw error;
+        }
+      }
+
+      function validateApiUrl(input) {
+        const url = new URL(input, apiBaseUrl);
+        const apiPath = apiBaseUrl.pathname;
+        if (url.origin !== sharePointOrigin ||
+            !(url.pathname === apiPath.slice(0, -1) || url.pathname.startsWith(apiPath))) {
+          throw new Error("SharePoint devolvio una URL fuera del REST del sitio configurado; no se envio ningun token.");
+        }
+        return url.href;
+      }
+
+      function extractErrorMessage(payload, fallback) {
+        const error = payload?.error;
+        const message = error?.message;
+        if (typeof message === "string") return message;
+        if (message?.value) return message.value;
+        if (message?.message) return message.message;
+        return fallback;
+      }
+
+      async function authorizedFetch(input, options = {}, token) {
+        const url = validateApiUrl(input);
+        const accessToken = token || await acquireAccessToken();
+        const headers = new Headers(options.headers || {});
+        headers.set("Authorization", `Bearer ${accessToken}`);
+        headers.set("Accept", headers.get("Accept") || "application/json;odata=minimalmetadata");
+        const response = await fetch(url, {
+          ...options,
+          headers,
+          credentials: "omit",
+          redirect: "error"
+        });
+        const text = await response.text();
+        let payload = null;
+        if (text) {
+          try {
+            payload = JSON.parse(text);
+          } catch {
+            payload = { message: text };
+          }
+        }
+        if (!response.ok) {
+          const fallback = response.statusText || `HTTP ${response.status}`;
+          throw new SharePointError(
+            response.status,
+            extractErrorMessage(payload, fallback),
+            payload?.error?.code
+          );
+        }
+        return { response, payload };
+      }
+
+      async function authorizedBlobFetch(input) {
+        const url = validateApiUrl(input);
+        const accessToken = await acquireAccessToken();
+        return fetchAttachmentBlob(url, {
+          accessToken,
+          fetchImpl: fetch,
+          onHttpError: async response => {
+          const text = await response.text();
+          let payload = null;
+          if (text) {
+            try {
+              payload = JSON.parse(text);
+            } catch {
+              payload = { message: text };
+            }
+          }
+          return new SharePointError(
+            response.status,
+            extractErrorMessage(payload, response.statusText || `HTTP ${response.status}`),
+            payload?.error?.code
+          );
+          }
+        });
+      }
+
+      async function getRequestDigest(token) {
+        if (state.digest && Date.now() < state.digestExpiresAt - 60000) {
+          return state.digest;
+        }
+        const { payload } = await authorizedFetch(apiBaseUrl.href + "contextinfo", {
+          method: "POST",
+          headers: { Accept: "application/json;odata=verbose" }
+        }, token);
+        const data = payload?.d || payload;
+        const info = data?.GetContextWebInformation;
+        if (!info?.FormDigestValue) {
+          throw new Error("SharePoint no devolvio un request digest valido.");
+        }
+        const timeout = Number(info.FormDigestTimeoutSeconds) || 1800;
+        state.digest = info.FormDigestValue;
+        state.digestExpiresAt = Date.now() + timeout * 1000;
+        return state.digest;
+      }
+
+      async function requestApi(input, options = {}) {
+        const method = String(options.method || "GET").toUpperCase();
+        const token = await acquireAccessToken();
+        const headers = new Headers(options.headers || {});
+        headers.set("Accept", headers.get("Accept") || "application/json;odata=minimalmetadata");
+        const request = { ...options, method, headers };
+        delete request.digest;
+        if (options.body && typeof options.body !== "string" && !(options.body instanceof ArrayBuffer)) {
+          request.body = JSON.stringify(options.body);
+          headers.set("Content-Type", headers.get("Content-Type") || "application/json;odata=nometadata");
+        }
+        if (method !== "GET" && method !== "HEAD" && options.digest !== false) {
+          headers.set("X-RequestDigest", await getRequestDigest(token));
+        }
+        return authorizedFetch(input, request, token);
+      }
+
+      function unwrap(payload) {
+        return payload?.d || payload;
+      }
+
+      async function readAllPages(input) {
+        return readAllPagesCore(input, {
+          requestPage: requestApi,
+          validateUrl: validateApiUrl
+        });
+      }
+
+      function odataLiteral(value) {
+        return `'${String(value).replace(/'/g, "''")}'`;
+      }
+
+      function getListPath(title) {
+        return `web/lists/getbytitle(${odataLiteral(title)})`;
+      }
+
+      async function readRemoteConfiguration() {
+        const site = unwrap((await requestApi(apiBaseUrl.href + "site?$select=Id,Url")).payload);
+        const web = unwrap((await requestApi(
+          apiBaseUrl.href + "web?$select=Id,Title,Url,AssociatedMemberGroup/Id,AssociatedMemberGroup/Title&$expand=AssociatedMemberGroup"
+        )).payload);
+        if (String(site.Id).toLowerCase() !== CONFIG.SITE_ID.toLowerCase()) {
+          throw new Error("El Site ID no coincide con el aprovisionamiento verificado.");
+        }
+        if (String(web.Id).toLowerCase() !== CONFIG.WEB_ID.toLowerCase()) {
+          throw new Error("El Web ID no coincide con el aprovisionamiento verificado.");
+        }
+        if (Number(web.AssociatedMemberGroup?.Id) !== CONFIG.MEMBER_GROUP_ID) {
+          throw new Error("El grupo de miembros asociado no coincide con el ID verificado.");
+        }
+        if (new URL(web.Url).origin !== sharePointOrigin) {
+          throw new Error("El sitio REST no coincide con el origen configurado.");
+        }
+
+        async function readList(title, expectedId) {
+          const path = `${getListPath(title)}?$select=Id,Title,BaseTemplate,ListItemEntityTypeFullName,RootFolder/ServerRelativeUrl,EnableAttachments,EnableVersioning&$expand=RootFolder`;
+          const list = unwrap((await requestApi(apiBaseUrl.href + path)).payload);
+          if (String(list.Id).toLowerCase() !== expectedId.toLowerCase() || list.BaseTemplate !== 100) {
+            throw new Error(`La lista ${title} no coincide con el aprovisionamiento verificado.`);
+          }
+          if (!list.ListItemEntityTypeFullName || !list.RootFolder?.ServerRelativeUrl) {
+            throw new Error(`No se pudo leer el esquema o la URL real de ${title}.`);
+          }
+          return list;
+        }
+
+        const [opportunities, documents] = await Promise.all([
+          readList(CONFIG.LIST_TITLE, CONFIG.OPPORTUNITIES_LIST_ID),
+          readList(CONFIG.DOCUMENTS_LIST_TITLE, CONFIG.DOCUMENTS_LIST_ID)
+        ]);
+        if (!documents.EnableAttachments || !documents.EnableVersioning) {
+          throw new Error("La lista documental no tiene adjuntos y versionado habilitados como se aprovisiono.");
+        }
+        state.listInfo = { opportunities, documents, memberGroup: web.AssociatedMemberGroup };
+        setListLink(dom.opportunityLink, opportunities.RootFolder.ServerRelativeUrl);
+        setListLink(dom.documentsLink, documents.RootFolder.ServerRelativeUrl);
+        return state.listInfo;
+      }
+
+      function setListLink(anchor, serverRelativeUrl) {
+        if (typeof serverRelativeUrl !== "string" || !serverRelativeUrl.startsWith("/")) {
+          throw new Error("SharePoint devolvio una ruta de lista no valida.");
+        }
+        const url = new URL(`${serverRelativeUrl.replace(/\/+$/, "")}/AllItems.aspx`, sharePointOrigin);
+        if (url.origin !== sharePointOrigin) {
+          throw new Error("El enlace de lista no pertenece al sitio SharePoint configurado.");
+        }
+        anchor.href = url.href;
+        anchor.target = "_blank";
+        anchor.rel = "noopener noreferrer";
+        anchor.removeAttribute("aria-disabled");
+        anchor.removeAttribute("tabindex");
+      }
+
+      async function loadMembers() {
+        return loadAssignableMembers({
+          baseUrl: apiBaseUrl.href,
+          readAllPages
+        });
+      }
+
+      function getAssigneeId(item) {
+        const value = item?.AsignadoAId ?? item?.AsignadoA?.Id ?? null;
+        return value === null || value === undefined || value === "" ? null : Number(value);
+      }
+
+      function mapOpportunity(item) {
+        const assignee = item.AsignadoA || item.asignadoA || null;
+        const rawAccount = firstString(assignee, ["Name", "name", "LoginName", "loginName"]);
+        const id = Number(item.Id ?? item.ID);
+        const title = String(item.Title ?? "");
+        const customer = String(item.Cliente ?? "");
+        const budget = Number(item.Presupuesto);
+        const status = String(item.Estado ?? "");
+        const date = String(item.Fecha ?? "");
+        const assigneeId = getAssigneeId(item);
+        const etag = getEtag(item);
+        if (!Number.isSafeInteger(id) || id <= 0) {
+          throw new Error("SharePoint devolvio una oportunidad con ID no valido.");
+        }
+        if (!title.trim() || !customer.trim()) {
+          throw new Error(`La oportunidad ${id} no contiene Cliente o Proyecto.`);
+        }
+        if (!Number.isFinite(budget) || budget < 0) {
+          throw new Error(`La oportunidad ${id} contiene un presupuesto no valido.`);
+        }
+        if (!STATUSES.includes(status)) {
+          throw new Error(`La oportunidad ${id} contiene un estado no reconocido.`);
+        }
+        if (!Number.isFinite(Date.parse(date))) {
+          throw new Error(`La oportunidad ${id} contiene una fecha no valida.`);
+        }
+        if (assigneeId !== null && (!Number.isSafeInteger(assigneeId) || assigneeId <= 0)) {
+          throw new Error(`La oportunidad ${id} contiene un responsable no valido.`);
+        }
+        if (!etag) {
+          throw new Error(`La oportunidad ${id} no devolvio ETag; no se habilitaran escrituras.`);
+        }
+        return {
+          id,
+          title,
+          customer,
+          budget,
+          status,
+          date,
+          assigneeId,
+          assigneeTitle: firstString(assignee, ["Title", "title", "DisplayName", "displayName"]),
+          assigneeAccount: accountFromLogin(rawAccount),
+          etag
+        };
+      }
+
+      async function loadOpportunities() {
+        const path = `${getListPath(CONFIG.LIST_TITLE)}/items` +
+          "?$select=Id,Title,Cliente,Presupuesto,Estado,Fecha,AsignadoAId,AsignadoA/Title,AsignadoA/Name" +
+          "&$expand=AsignadoA&$orderby=Id%20desc&$top=500";
+        const items = await readAllPages(apiBaseUrl.href + path);
+        return items.map(mapOpportunity).sort((a, b) => {
+          const left = Date.parse(a.date);
+          const right = Date.parse(b.date);
+          return (Number.isFinite(right) ? right : 0) - (Number.isFinite(left) ? left : 0);
+        });
+      }
+
+      function documentsForOpportunityPath(opportunityId, select = "Id") {
+        return `${getListPath(CONFIG.DOCUMENTS_LIST_TITLE)}/items` +
+          `?$select=${select}&$filter=OportunidadId%20eq%20${encodeURIComponent(String(opportunityId))}` +
+          "&$orderby=Id%20desc&$top=100";
+      }
+
+      function collectionValues(value) {
+        if (Array.isArray(value)) return value;
+        if (Array.isArray(value?.results)) return value.results;
+        if (Array.isArray(value?.value)) return value.value;
+        return [];
+      }
+
+      function mapDocument(item) {
+        const id = Number(item.Id ?? item.ID);
+        const opportunityId = Number(item.OportunidadId ?? item.Oportunidad?.Id);
+        const rawAttachments = item.AttachmentFiles ?? item.attachmentFiles;
+        const hasAttachmentCollection = Array.isArray(rawAttachments) ||
+          Array.isArray(rawAttachments?.results) ||
+          Array.isArray(rawAttachments?.value);
+        if (!hasAttachmentCollection) {
+          throw new Error(`SharePoint no expandio los adjuntos del documento ${id}.`);
+        }
+        const attachments = collectionValues(rawAttachments);
+        if (attachments.length > 1) {
+          throw new Error(`El documento ${id} tiene varios adjuntos; se requiere uno por registro documental.`);
+        }
+        const attachment = attachments[0] || null;
+        const fileName = String(attachment?.FileName ?? item.Title ?? "");
+        const etag = getEtag(item);
+        if (!Number.isSafeInteger(id) || id <= 0 ||
+            !Number.isSafeInteger(opportunityId) || opportunityId <= 0) {
+          throw new Error("SharePoint devolvio un documento con IDs no validos.");
+        }
+        if (!etag) {
+          throw new Error(`El documento ${id} no devolvio ETag; no se habilitaran escrituras.`);
+        }
+        if (attachment && !fileName) {
+          throw new Error(`El adjunto del documento ${id} no tiene un nombre descargable.`);
+        }
+        const assigneeIdValue = item.AsignadoAId ?? item.AsignadoA?.Id ?? null;
+        const assigneeId = assigneeIdValue === null || assigneeIdValue === "" ? null : Number(assigneeIdValue);
+        if (assigneeId !== null && (!Number.isSafeInteger(assigneeId) || assigneeId <= 0)) {
+          throw new Error(`El documento ${id} contiene un responsable no valido.`);
+        }
+        return {
+          id,
+          opportunityId,
+          title: String(item.Title ?? ""),
+          fileName,
+          hasAttachment: attachments.length > 0,
+          assigneeId,
+          assigneeTitle: firstString(item.AsignadoA, ["Title", "title", "DisplayName", "displayName"]),
+          validationStatus: String(item.EstadoValidacion ?? ""),
+          observations: String(item.Observaciones ?? ""),
+          validatorAccount: accountFromLogin(String(item.ValidadoPor ?? "")),
+          validationDate: String(item.FechaValidacion ?? ""),
+          etag
+        };
+      }
+
+      async function readDocumentsForOpportunity(opportunityId) {
+        const select = [
+          "Id", "Title", "OportunidadId", "AsignadoAId", "AsignadoA/Title", "AsignadoA/Name",
+          "EstadoValidacion", "Observaciones", "ValidadoPor", "FechaValidacion", "Created",
+          "AttachmentFiles"
+        ].join(",");
+        const path = documentsForOpportunityPath(opportunityId, select) +
+          "&$expand=AsignadoA,AttachmentFiles";
+        const items = await readAllPages(apiBaseUrl.href + path);
+        return items.map(mapDocument);
+      }
+
+      async function readCurrentSharePointUser() {
+        const user = unwrap((await requestApi(
+          apiBaseUrl.href + "web/currentuser?$select=Title,LoginName,Email"
+        )).payload);
+        const account = accountFromLogin(
+          firstString(user, ["LoginName", "loginName", "Email", "email"])
+        );
+        if (!account) {
+          throw new Error("No se pudo obtener la cuenta del usuario actual desde SharePoint.");
+        }
+        return {
+          account,
+          displayName: firstString(user, ["Title", "title"]) || account
+        };
+      }
+
+      function validateDocumentFile(file) {
+        return validateDocumentFileCore(file, MAX_DOCUMENT_SIZE, MAX_DOCUMENT_NAME_LENGTH);
+      }
+
+      function attachmentPath(documentId, fileName, operation) {
+        const listPath = `${getListPath(CONFIG.DOCUMENTS_LIST_TITLE)}/items(${Number(documentId)})/AttachmentFiles`;
+        const fileLiteral = encodedODataLiteral(fileName);
+        if (operation === "add") {
+          return `${listPath}/add(FileName=${fileLiteral})`;
+        }
+        return `${listPath}/getByFileName(${fileLiteral})/$value`;
+      }
+
+      function itemPath(listTitle, id) {
+        if (!Number.isSafeInteger(Number(id)) || Number(id) <= 0) {
+          throw new Error("El ID del elemento SharePoint no es valido.");
+        }
+        return `${getListPath(listTitle)}/items(${Number(id)})`;
+      }
+
+      async function mergeItem(listTitle, id, fields, etag) {
+        if (!etag) {
+          throw new Error("Falta el ETag leido. Actualiza la lista antes de volver a intentar.");
+        }
+        const path = itemPath(listTitle, id);
+        const { response } = await requestApi(apiBaseUrl.href + path, {
+          method: "POST",
+          headers: {
+            "X-HTTP-Method": "MERGE",
+            "IF-MATCH": etag
+          },
+          body: fields
+        });
+        return response;
+      }
+
+      async function deleteItem(listTitle, id, etag) {
+        if (!etag) {
+          throw new Error("Falta el ETag leido. Actualiza la lista antes de volver a intentar.");
+        }
+        const { response } = await requestApi(apiBaseUrl.href + itemPath(listTitle, id), {
+          method: "POST",
+          headers: {
+            "X-HTTP-Method": "DELETE",
+            "IF-MATCH": etag
+          }
+        });
+        return response;
+      }
+
+      async function compensateDocumentCreation(documentId) {
+        let deleteError = null;
+        try {
+          await requestApi(apiBaseUrl.href + itemPath(CONFIG.DOCUMENTS_LIST_TITLE, documentId), {
+            method: "POST",
+            headers: {
+              "X-HTTP-Method": "DELETE",
+              "IF-MATCH": "*"
+            }
+          });
+        } catch (error) {
+          deleteError = error;
+        }
+
+        try {
+          await readItem(CONFIG.DOCUMENTS_LIST_TITLE, documentId, "$select=Id");
+          return {
+            confirmed: false,
+            error: deleteError || new Error("El registro provisional todavía existe.")
+          };
+        } catch (readError) {
+          if (readError instanceof SharePointError && readError.status === 404) {
+            return { confirmed: true, error: null };
+          }
+          return {
+            confirmed: false,
+            error: deleteError || readError
+          };
+        }
+      }
+
+      async function readItem(listTitle, id, query) {
+        const path = itemPath(listTitle, id) + (query ? `?${query}` : "");
+        return unwrap((await requestApi(apiBaseUrl.href + path)).payload);
+      }
+
+      async function synchronizeDocumentAssignments(opportunities) {
+        const select = "Id,OportunidadId,AsignadoAId";
+        const path = `${getListPath(CONFIG.DOCUMENTS_LIST_TITLE)}/items` +
+          `?$select=${select}&$orderby=Id%20asc&$top=100`;
+        return synchronizeAssignmentsCore({
+          opportunities,
+          documentsUrl: apiBaseUrl.href + path,
+          readAllPages,
+          mergeDocument: (id, fields, etag) =>
+            mergeItem(CONFIG.DOCUMENTS_LIST_TITLE, id, fields, etag),
+          readDocument: (id, query) => readItem(CONFIG.DOCUMENTS_LIST_TITLE, id, query)
+        });
+      }
+
+      function setDocumentMessage(message, type = "info") {
+        dom.documentMessage.textContent = message;
+        dom.documentMessage.className = `message document-message visible${type === "info" ? "" : ` ${type}`}`;
+        dom.documentMessage.setAttribute("role", type === "error" ? "alert" : "status");
+      }
+
+      function clearDocumentMessage() {
+        dom.documentMessage.textContent = "";
+        dom.documentMessage.className = "message document-message";
+        dom.documentMessage.setAttribute("role", "status");
+      }
+
+      function invalidateDocumentData(needsRefresh) {
+        state.documentRequestId += 1;
+        state.documentItems = [];
+        state.documentsReady = false;
+        state.documentsLoading = false;
+        state.documentsNeedRefresh = needsRefresh;
+        state.documentLoadError = "";
+        state.selectedDocumentId = null;
+        dom.documentFile.value = "";
+        dom.reviewForm.reset();
+        dom.reviewForm.hidden = true;
+        dom.reviewEmpty.hidden = false;
+        clearDocumentMessage();
+      }
+
+      async function loadDocumentsForOpportunity(opportunityId) {
+        const opportunity = state.opportunities.find(item => item.id === opportunityId);
+        if (!opportunity) {
+          invalidateDocumentData(true);
+          state.documentLoadError = "La oportunidad no está disponible en la lectura actual.";
+          render();
+          return { error: new Error(state.documentLoadError) };
+        }
+
+        invalidateDocumentData(true);
+        const requestId = ++state.documentRequestId;
+        state.documentsLoading = true;
+        render();
+        try {
+          const documents = await readDocumentsForOpportunity(opportunityId);
+          if (requestId !== state.documentRequestId ||
+              state.selectedDocumentOpportunityId !== opportunityId) {
+            return { error: null, stale: true };
+          }
+          state.documentItems = documents;
+          state.documentsReady = true;
+          state.documentsNeedRefresh = false;
+          state.documentLoadError = "";
+          state.documentsLoading = false;
+          render();
+          return { error: null };
+        } catch (error) {
+          if (requestId !== state.documentRequestId ||
+              state.selectedDocumentOpportunityId !== opportunityId) {
+            return { error: null, stale: true };
+          }
+          handleRequestFailure(error);
+          state.documentItems = [];
+          state.documentsReady = false;
+          state.documentsNeedRefresh = true;
+          state.documentLoadError = `No se pudieron leer los documentos actuales. ${describeError(error)}`;
+          state.documentsLoading = false;
+          setDocumentMessage(state.documentLoadError, "error");
+          render();
+          return { error };
+        }
+      }
+
+      async function refreshData() {
+        state.dataReady = false;
+        state.needsRefresh = true;
+        state.opportunities = [];
+        state.members = [];
+        invalidateDocumentData(true);
+        render();
+        await readRemoteConfiguration();
+        const members = await loadMembers();
+        const opportunities = await loadOpportunities();
+        state.members = members;
+        state.opportunities = opportunities;
+        renderAssigneeFormOptions();
+        if (!opportunities.some(item => item.id === state.selectedDocumentOpportunityId)) {
+          state.selectedDocumentOpportunityId = null;
+        }
+        renderDocumentOpportunityOptions();
+        render();
+        const syncResult = await synchronizeDocumentAssignments(opportunities);
+        state.dataReady = true;
+        state.needsRefresh = false;
+        let documentLoadError = null;
+        if (state.selectedDocumentOpportunityId !== null) {
+          const documentLoad = await loadDocumentsForOpportunity(state.selectedDocumentOpportunityId);
+          documentLoadError = documentLoad.error;
+        } else {
+          state.documentsNeedRefresh = false;
+        }
+        render();
+        return { ...syncResult, documentLoadError };
+      }
+
+      function getKpis(opportunities) {
+        const pipeline = opportunities.reduce((sum, opportunity) =>
+          sum + opportunity.budget, 0);
+        const wonItems = opportunities.filter(item => item.status === "Ganada");
+        const lostItems = opportunities.filter(item => item.status === "Perdida");
+        const won = wonItems.reduce((sum, opportunity) =>
+          sum + opportunity.budget, 0);
+        const open = opportunities.filter(item =>
+          item.status === "Prospecto" || item.status === "Negociación"
+        ).length;
+        const closed = wonItems.length + lostItems.length;
+        return {
+          pipeline,
+          won,
+          open,
+          success: closed ? Math.round(100 * wonItems.length / closed) : 0
+        };
+      }
+
+      function formatDate(value) {
+        if (!value) return "—";
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? "—" : dateFormatter.format(date);
+      }
+
+      function formatDateTime(value) {
+        if (!value) return "—";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "—";
+        return `${new Intl.DateTimeFormat("es-ES", {
+          dateStyle: "medium",
+          timeStyle: "short",
+          timeZone: "UTC"
+        }).format(date)} UTC`;
+      }
+
+      function statusClass(status) {
+        if (status === "Ganada") return "won";
+        if (status === "Perdida") return "lost";
+        if (status === "Negociación") return "negotiation";
+        return "prospect";
+      }
+
+      function documentStatusClass(status) {
+        if (status === "Validado") return "validated";
+        if (status === "Rechazado") return "rejected";
+        if (status === "Pendiente") return "pending";
+        return "";
+      }
+
+      function renderKpis() {
+        const values = getKpis(state.opportunities);
+        dom.pipeline.textContent = currencyFormatter.format(values.pipeline);
+        dom.won.textContent = currencyFormatter.format(values.won);
+        dom.open.textContent = String(values.open);
+        dom.success.textContent = `${values.success}%`;
+      }
+
+      function countStatus(status) {
+        if (status === "Todos") return state.opportunities.length;
+        return state.opportunities.filter(item => item.status === status).length;
+      }
+
+      function renderFilters() {
+        dom.filters.innerHTML = STATUS_FILTERS.map(status => `
+          <button type="button" class="filter-button" data-filter="${escapeHtml(status)}"
+            aria-pressed="${state.filter === status}" ${!state.dataReady || state.busy ? "disabled" : ""}>
+            <span>${escapeHtml(status)}</span>
+            <span class="filter-count" aria-label="${countStatus(status)}">${countStatus(status)}</span>
+          </button>
+        `).join("");
+      }
+
+      function currentMemberFor(opportunity) {
+        const key = normalizedAccount(opportunity.assigneeAccount);
+        return key ? state.members.find(member => member.normalized === key) || null : null;
+      }
+
+      function renderAssigneeSelect(opportunity) {
+        const selectedMember = currentMemberFor(opportunity);
+        const noAssignment = opportunity.assigneeId === null;
+        let options = "";
+        if (selectedMember) {
+          options += `<option value="${escapeHtml(selectedMember.account)}" selected>${escapeHtml(selectedMember.displayName)}</option>`;
+        } else if (noAssignment) {
+          options += `<option value="" selected disabled>Sin asignar</option>`;
+        } else {
+          const oldLabel = opportunity.assigneeTitle || "Asignacion historica";
+          options += `<option value="__current__" selected disabled>${escapeHtml(oldLabel)} (ya no miembro)</option>`;
+        }
+        options += state.members
+          .filter(member => !selectedMember || member.normalized !== selectedMember.normalized)
+          .map(member => `<option value="${escapeHtml(member.account)}">${escapeHtml(member.displayName)}</option>`)
+          .join("");
+        return `<select class="row-select" data-action="assignee" data-id="${opportunity.id}" aria-label="Cambiar responsable de ${escapeHtml(opportunity.title)}" ${!canMutate() ? "disabled" : ""}>${options}</select>`;
+      }
+
+      function renderStatusSelect(opportunity) {
+        const options = STATUSES.map(status =>
+          `<option value="${escapeHtml(status)}" ${opportunity.status === status ? "selected" : ""}>${escapeHtml(status)}</option>`
+        ).join("");
+        return `<select class="row-select" data-action="status" data-id="${opportunity.id}" aria-label="Cambiar estado de ${escapeHtml(opportunity.title)}" ${!canMutate() ? "disabled" : ""}>${options}</select>`;
+      }
+
+      function renderActions(opportunity) {
+        return `<div class="row-actions">
+          <button type="button" class="button secondary small" data-action="documents" data-id="${opportunity.id}" ${!state.dataReady || state.busy ? "disabled" : ""}>
+            <i data-lucide="files" aria-hidden="true"></i><span>Documentos</span>
+          </button>
+          <button type="button" class="button danger small" data-action="delete" data-id="${opportunity.id}" ${!canMutate() ? "disabled" : ""} aria-label="Eliminar ${escapeHtml(opportunity.title)}">
+            <i data-lucide="trash-2" aria-hidden="true"></i><span>Eliminar</span>
+          </button>
+        </div>`;
+      }
+
+      function renderTable(opportunities) {
+        if (!opportunities.length) return renderEmptyState();
+        const rows = opportunities.map(opportunity => `
+          <tr class="${state.highlightedId === opportunity.id ? "highlight-row" : ""}">
+            <td>${escapeHtml(opportunity.customer)}</td>
+            <td class="cell-project">${escapeHtml(opportunity.title)}</td>
+            <td>${escapeHtml(opportunity.assigneeTitle || "Sin asignar")}${opportunity.assigneeId !== null && !currentMemberFor(opportunity) ? '<span class="help"> · ya no miembro</span>' : ""}</td>
+            <td>${currencyFormatter.format(opportunity.budget)}</td>
+            <td><span class="status-badge ${statusClass(opportunity.status)}">${escapeHtml(opportunity.status)}</span></td>
+            <td>${escapeHtml(formatDate(opportunity.date))}</td>
+            <td>${renderStatusSelect(opportunity)}</td>
+            <td>${renderAssigneeSelect(opportunity)}</td>
+            <td class="cell-actions">${renderActions(opportunity)}</td>
+          </tr>
+        `).join("");
+        return `<div class="table-scroll" role="region" aria-label="Tabla de oportunidades" tabindex="0">
+          <table>
+            <thead><tr>
+              <th scope="col">Cliente</th><th scope="col">Proyecto</th><th scope="col">Asignado a</th>
+              <th scope="col">Presupuesto</th><th scope="col">Estado</th><th scope="col">Fecha</th>
+              <th scope="col">Cambiar estado</th><th scope="col">Cambiar responsable</th><th scope="col">Acciones</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+      }
+
+      function renderCards(opportunities) {
+        if (!opportunities.length) return renderEmptyState();
+        return `<div class="card-grid">${opportunities.map(opportunity => `
+          <article class="opportunity-card ${state.highlightedId === opportunity.id ? "highlight-row" : ""}">
+            <div class="card-top">
+              <div>
+                <h3 class="card-title">${escapeHtml(opportunity.title)}</h3>
+                <p class="card-client">${escapeHtml(opportunity.customer)}</p>
+              </div>
+              <span class="status-badge ${statusClass(opportunity.status)}">${escapeHtml(opportunity.status)}</span>
+            </div>
+            <p class="card-budget">${currencyFormatter.format(opportunity.budget)}</p>
+            <div class="card-details">
+              <div><span class="card-detail-label">Asignado a</span><span class="card-detail-value">${escapeHtml(opportunity.assigneeTitle || "Sin asignar")}${opportunity.assigneeId !== null && !currentMemberFor(opportunity) ? " (ya no miembro)" : ""}</span></div>
+              <div><span class="card-detail-label">Fecha</span><span class="card-detail-value">${escapeHtml(formatDate(opportunity.date))}</span></div>
+            </div>
+            <div class="card-control">
+              <label>Estado ${renderStatusSelect(opportunity)}</label>
+              <label>Responsable ${renderAssigneeSelect(opportunity)}</label>
+            </div>
+            ${renderActions(opportunity)}
+          </article>
+        `).join("")}</div>`;
+      }
+
+      function renderEmptyState() {
+        if (!state.authenticated) {
+          return `<div class="empty-state"><strong>Sin conexion</strong>Conecta SharePoint para consultar las oportunidades. No se muestran datos de ejemplo.</div>`;
+        }
+        if (!state.dataReady) {
+          return `<div class="empty-state"><strong>Datos no disponibles</strong>Actualiza SharePoint o revisa el mensaje de error. No se muestran resultados de una lectura fallida como actuales.</div>`;
+        }
+        return `<div class="empty-state"><strong>No hay oportunidades para este filtro</strong>Los registros se leen desde SharePoint; no se precargan datos ficticios.</div>`;
+      }
+
+      function renderDocumentOpportunityOptions() {
+        const selected = state.selectedDocumentOpportunityId;
+        const options = ['<option value="">Selecciona una oportunidad</option>']
+          .concat(state.opportunities.map(opportunity =>
+            `<option value="${opportunity.id}">${escapeHtml(`${opportunity.customer} — ${opportunity.title}`)}</option>`
+          ));
+        dom.documentOpportunity.innerHTML = options.join("");
+        dom.documentOpportunity.value = selected === null ? "" : String(selected);
+      }
+
+      function renderDocumentList() {
+        if (state.documentsLoading) {
+          return '<div class="document-empty">Consultando documentos en SharePoint...</div>';
+        }
+        if (!state.documentsReady) {
+          const message = state.documentLoadError ||
+            (state.selectedDocumentOpportunityId === null
+              ? "Selecciona una oportunidad para consultar sus documentos."
+              : "Actualiza documentos para cargar los datos actuales.");
+          return `<div class="document-empty">${escapeHtml(message)}</div>`;
+        }
+        if (!state.documentItems.length) {
+          return '<div class="document-empty">Esta oportunidad no tiene documentos registrados.</div>';
+        }
+        const rows = state.documentItems.map(item => {
+          const name = item.fileName || item.title || "Documento sin nombre";
+          const status = VALIDATION_STATUSES.includes(item.validationStatus)
+            ? item.validationStatus
+            : "Estado no reconocido";
+          const assignee = item.assigneeTitle ||
+            (item.assigneeId === null ? "Sin asignar" : "Usuario asignado");
+          return `<tr>
+            <td>
+              <button type="button" class="document-name-button" data-document-action="review" data-id="${item.id}"
+                ${!item.hasAttachment || state.busy || state.documentsNeedRefresh ? "disabled" : ""}>
+                ${escapeHtml(name)}
+              </button>
+              ${item.hasAttachment ? "" : '<span class="help"> · Carga incompleta</span>'}
+            </td>
+            <td>${escapeHtml(assignee)}</td>
+            <td><span class="document-status ${documentStatusClass(item.validationStatus)}">${escapeHtml(status)}</span></td>
+            <td><div class="document-row-actions">
+              <button type="button" class="button secondary small" data-document-action="download" data-id="${item.id}"
+                ${!item.hasAttachment || state.busy || state.documentsNeedRefresh ? "disabled" : ""} aria-label="Descargar ${escapeHtml(name)}">
+                <i data-lucide="download" aria-hidden="true"></i><span>Descargar</span>
+              </button>
+              <button type="button" class="button danger small" data-document-action="delete" data-id="${item.id}"
+                ${!canMutate() || state.documentsNeedRefresh ? "disabled" : ""} aria-label="Eliminar ${escapeHtml(name)}">
+                <i data-lucide="trash-2" aria-hidden="true"></i><span>Eliminar</span>
+              </button>
+            </div></td>
+          </tr>`;
+        }).join("");
+        return `<div class="document-list-scroll" role="region" aria-label="Documentos de la oportunidad" tabindex="0">
+          <table class="document-table">
+            <thead><tr><th scope="col">Nombre</th><th scope="col">Responsable heredado</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+      }
+
+      function selectedDocument() {
+        return state.documentItems.find(item => item.id === state.selectedDocumentId) || null;
+      }
+
+      function renderDocumentPanel() {
+        const selectedOpportunity = state.opportunities.find(
+          item => item.id === state.selectedDocumentOpportunityId
+        ) || null;
+        const currentDocument = selectedDocument();
+        const canUseDocumentData = state.documentsReady &&
+          !state.documentsLoading &&
+          !state.documentsNeedRefresh;
+        const canReview = canMutate() && canUseDocumentData &&
+          Boolean(currentDocument?.hasAttachment);
+
+        dom.documentOpportunity.disabled =
+          !state.authenticated || !state.dataReady || state.busy || !state.opportunities.length;
+        dom.refreshDocuments.disabled = !state.authenticated || state.busy;
+        dom.documentUploadFields.disabled = !canMutate() ||
+          !selectedOpportunity || !canUseDocumentData;
+        dom.reviewStatus.disabled = !canReview;
+        dom.reviewObservations.disabled = !canReview;
+        dom.saveReviewButton.disabled = !canReview;
+        dom.documentsContext.textContent = selectedOpportunity
+          ? `Oportunidad seleccionada: ${selectedOpportunity.customer} — ${selectedOpportunity.title}. El responsable del documento se copia desde la asignación actual.`
+          : "Selecciona una oportunidad para consultar y gestionar sus documentos.";
+
+        if (!state.authenticated || !state.dataReady) {
+          dom.documentSummary.textContent = "Conecta y carga las oportunidades para gestionar documentos.";
+        } else if (!selectedOpportunity) {
+          dom.documentSummary.textContent = "Selecciona una oportunidad.";
+        } else if (state.documentsLoading) {
+          dom.documentSummary.textContent = "Actualizando documentos...";
+        } else if (!state.documentsReady) {
+          dom.documentSummary.textContent = "Los documentos no están disponibles en esta lectura.";
+        } else {
+          const pending = state.documentItems.filter(item =>
+            item.validationStatus === "Pendiente"
+          ).length;
+          dom.documentSummary.textContent =
+            `${selectedOpportunity.customer} — ${selectedOpportunity.title}: ` +
+            `${state.documentItems.length} documento(s), ${pending} Pendiente.`;
+        }
+
+        if (currentDocument?.hasAttachment) {
+          dom.reviewEmpty.hidden = true;
+          dom.reviewForm.hidden = false;
+          dom.reviewDocumentName.textContent = currentDocument.fileName || currentDocument.title;
+          dom.reviewDocumentAssignee.textContent =
+            `Responsable heredado: ${currentDocument.assigneeTitle || (currentDocument.assigneeId === null ? "Sin asignar" : "Usuario asignado")}`;
+          const previousAudit = currentDocument.validatorAccount
+            ? `Última revisión registrada por ${currentDocument.validatorAccount}, ${formatDateTime(currentDocument.validationDate)}.`
+            : "No hay una cuenta ni fecha de revisión registradas.";
+          dom.reviewDocumentAudit.textContent =
+            `${previousAudit} Al guardar Validado o Rechazado se registrarán la cuenta actual de SharePoint y la hora UTC.`;
+        } else {
+          dom.reviewForm.hidden = true;
+          dom.reviewEmpty.hidden = false;
+          dom.reviewEmpty.textContent = currentDocument && !currentDocument.hasAttachment
+            ? "Este registro está marcado como Carga incompleta. Puedes eliminarlo, pero no descargar ni revisar."
+            : "Selecciona el nombre de un archivo para revisar sus metadatos.";
+        }
+
+        dom.documentsContent.innerHTML = renderDocumentList();
+        if (window.lucide?.createIcons) window.lucide.createIcons();
+      }
+
+      function filteredOpportunities() {
+        const items = state.filter === "Todos"
+          ? state.opportunities
+          : state.opportunities.filter(item => item.status === state.filter);
+        return [...items].sort((a, b) => {
+          const left = Date.parse(a.date);
+          const right = Date.parse(b.date);
+          return (Number.isFinite(right) ? right : 0) - (Number.isFinite(left) ? left : 0);
+        });
+      }
+
+      function canMutate() {
+        return state.authenticated && state.dataReady && !state.busy && !state.needsRefresh;
+      }
+
+      function render() {
+        const canConnect = !state.busy;
+        dom.clientId.disabled = state.busy;
+        dom.connect.disabled = !canConnect;
+        dom.refresh.disabled = state.busy || !state.authenticated;
+        dom.fieldset.disabled = !canMutate();
+        dom.viewTable.disabled = !state.dataReady || state.busy;
+        dom.viewCards.disabled = !state.dataReady || state.busy;
+        dom.viewTable.setAttribute("aria-pressed", String(state.view === "table"));
+        dom.viewCards.setAttribute("aria-pressed", String(state.view === "cards"));
+        dom.account.textContent = state.account?.username ? `Cuenta: ${state.account.username}` : "";
+        dom.subtitle.textContent = state.dataReady
+          ? `${state.opportunities.length} oportunidad(es) cargada(s) desde SharePoint`
+          : state.authenticated
+            ? "Actualiza SharePoint para consultar los registros."
+            : "Conecta SharePoint para cargar los registros.";
+        dom.resultsMeta.textContent = state.dataReady
+          ? `${filteredOpportunities().length} de ${state.opportunities.length} oportunidad(es)`
+          : "Sin oportunidades cargadas";
+        renderKpis();
+        renderFilters();
+        const visible = filteredOpportunities();
+        dom.content.innerHTML = !state.dataReady
+          ? renderEmptyState()
+          : state.view === "cards"
+            ? renderCards(visible)
+            : renderTable(visible);
+        renderDocumentPanel();
+        if (window.lucide?.createIcons) window.lucide.createIcons();
+      }
+
+      function setBusy(busy) {
+        state.busy = busy;
+        dom.app.setAttribute("aria-busy", String(busy));
+        render();
+      }
+
+      function clearSnapshot() {
+        state.opportunities = [];
+        state.members = [];
+        state.selectedDocumentOpportunityId = null;
+        invalidateDocumentData(false);
+        renderDocumentOpportunityOptions();
+        state.listInfo = null;
+        state.dataReady = false;
+        state.needsRefresh = false;
+        state.digest = null;
+        state.digestExpiresAt = 0;
+      }
+
+      function disconnect(message) {
+        state.authenticated = false;
+        state.account = null;
+        clearSnapshot();
+        setConnectionMessage("Sin conexion", "");
+        if (message) setMessage(message, "error");
+        render();
+      }
+
+      function describeError(error) {
+        if (error instanceof SynchronizationError) {
+          return `Sincronizacion detenida tras ${error.updated} escritura(s) confirmada(s); documento ${error.documentId}; ${describeError(error.cause)}`;
+        }
+        if (error instanceof SharePointError) {
+          if (error.status === 401) return "SharePoint devolvio 401. La sesion expiro; vuelve a conectar.";
+          if (error.status === 403) return `SharePoint devolvio 403. Verifica los permisos delegados y los permisos efectivos del usuario. ${error.message}`;
+          if (error.status === 404) return `SharePoint devolvio 404. No se encontro una lista o registro esperado. ${error.message}`;
+          if (error.status === 412) return "SharePoint devolvio 412: otro usuario modifico el registro. Actualiza antes de volver a intentarlo.";
+          return `SharePoint devolvio HTTP ${error.status}: ${error.message}`;
+        }
+        return error?.message || String(error);
+      }
+
+      function handleRequestFailure(error) {
+        const visited = new Set();
+        let current = error;
+        while (current && !visited.has(current)) {
+          visited.add(current);
+          if (current instanceof SharePointError && current.status === 401) {
+            disconnect("La sesion de SharePoint expiro. Vuelve a conectar.");
+            return;
+          }
+          current = current.cause;
+        }
+      }
+
+      function synchronizationSummary(result) {
+        return `Sincronizacion completada: ${result.total} documento(s) verificado(s), ${result.updated} actualizado(s).`;
+      }
+
+      async function refreshConnectedData(successMessage) {
+        const result = await refreshData();
+        if (state.authenticated) {
+          setConnectionMessage(`Conectado${state.account?.username ? ` como ${state.account.username}` : ""}`, "online");
+        }
+        if (state.authenticated) {
+          const documentMessage = result.documentLoadError
+            ? ` La lectura de documentos fallo; no se muestran datos anteriores como actuales. ${describeError(result.documentLoadError)}`
+            : "";
+          setMessage(`${successMessage || "Datos cargados desde SharePoint."} ${synchronizationSummary(result)}${documentMessage}`,
+            result.documentLoadError ? "warning" : "success");
+        }
+        return result;
+      }
+
+      async function initializeOnLoad() {
+        setBusy(true);
+        try {
+          const response = await initializeMsal(state.clientId, true);
+          const accounts = state.msal.getAllAccounts();
+          const account = response?.account ||
+            state.msal.getActiveAccount() ||
+            accounts[0] ||
+            null;
+          if (!account) {
+            setConnectionMessage("Sin conexion", "");
+            return;
+          }
+          state.account = account;
+          state.msal.setActiveAccount(account);
+          state.authenticated = true;
+          setConnectionMessage("Restaurando sesion...", "");
+          try {
+            await acquireAccessToken(account);
+            await refreshConnectedData();
+          } catch (error) {
+            handleRequestFailure(error);
+            state.dataReady = false;
+            if (state.authenticated) setConnectionMessage("No se pudo restaurar la sesion", "error");
+            setMessage(describeError(error), "error");
+          }
+        } catch (error) {
+          setConnectionMessage("Autenticacion no disponible", "error");
+          setMessage(`No se pudo inicializar MSAL: ${describeError(error)}`, "error");
+        } finally {
+          setBusy(false);
+          render();
+        }
+      }
+
+      async function connect() {
+        const clientId = currentClientId();
+        if (!GUID_PATTERN.test(clientId)) {
+          setMessage("El ID de aplicacion debe ser un GUID valido.", "error");
+          dom.clientId.focus();
+          return;
+        }
+        clearMessage();
+        setBusy(true);
+        try {
+          if (!state.msal || state.msalClientId.toLowerCase() !== clientId.toLowerCase()) {
+            state.msal = null;
+            state.account = null;
+            state.authenticated = false;
+            clearSnapshot();
+            await initializeMsal(clientId, false);
+          }
+          const result = await state.msal.loginPopup({
+            scopes: [sharePointScope],
+            prompt: "select_account",
+            redirectUri: redirectUri()
+          });
+          if (!result?.account) {
+            throw new Error("Microsoft no devolvio una cuenta autenticada.");
+          }
+          state.account = result.account;
+          state.msal.setActiveAccount(result.account);
+          state.authenticated = true;
+          state.clientId = clientId;
+          setConnectionMessage("Autenticado; cargando datos...", "");
+          try {
+            await refreshConnectedData();
+          } catch (error) {
+            handleRequestFailure(error);
+            state.dataReady = false;
+            state.needsRefresh = true;
+            if (state.authenticated) {
+              setConnectionMessage("Autenticado, pero no se pudieron cargar los datos", "error");
+            }
+            setMessage(describeError(error), "error");
+          }
+        } catch (error) {
+          const code = String(error?.errorCode || "").toLowerCase();
+          if (code === "popup_window_error" || code === "empty_window_error") {
+            setConnectionMessage("Abriendo inicio de sesion...", "");
+            await state.msal.loginRedirect({
+              scopes: [sharePointScope],
+              prompt: "select_account",
+              redirectUri: redirectUri()
+            });
+            return;
+          }
+          if (isUserCancellation(error)) {
+            state.authenticated = false;
+            state.dataReady = false;
+            setConnectionMessage("Inicio de sesion cancelado", "");
+            setMessage("No se completo el inicio de sesion. La aplicacion sigue desconectada.", "warning");
+          } else {
+            state.authenticated = false;
+            state.dataReady = false;
+            setConnectionMessage("No se pudo conectar", "error");
+            setMessage(`No se completo la conexion: ${describeError(error)}`, "error");
+          }
+        } finally {
+          setBusy(false);
+          render();
+        }
+      }
+
+      async function manualRefresh() {
+        if (!state.authenticated) return;
+        clearMessage();
+        setBusy(true);
+        try {
+          await refreshConnectedData("Datos actualizados desde SharePoint.");
+        } catch (error) {
+          handleRequestFailure(error);
+          state.dataReady = false;
+          state.needsRefresh = true;
+          if (state.authenticated) setConnectionMessage("No se pudo actualizar", "error");
+          setMessage(describeError(error), "error");
+        } finally {
+          setBusy(false);
+          render();
+        }
+      }
+
+      async function resolveSiteUser(account) {
+        const response = await requestApi(apiBaseUrl.href + "web/ensureuser", {
+          method: "POST",
+          body: { logonName: account }
+        });
+        const user = unwrap(response.payload);
+        const id = Number(user?.Id ?? user?.ID);
+        if (!Number.isSafeInteger(id) || id <= 0) {
+          throw new Error(`SharePoint no devolvio un ID de usuario valido para ${account}.`);
+        }
+        return id;
+      }
+
+      async function revalidateMember(account) {
+        const members = await loadMembers();
+        state.members = members;
+        renderAssigneeFormOptions();
+        try {
+          return requireAssignableMember(account, members);
+        } catch (error) {
+          render();
+          throw error;
+        }
+      }
+
+      function validateBudget(value) {
+        const trimmed = value.trim();
+        if (!/^\d+(?:\.\d{1,2})?$/.test(trimmed)) {
+          throw new Error("El presupuesto debe ser un decimal con punto y hasta dos decimales; no se admite notacion exponencial.");
+        }
+        const amount = Number(trimmed);
+        if (!Number.isFinite(amount) || amount < 0) {
+          throw new Error("El presupuesto debe ser finito y no negativo.");
+        }
+        return amount;
+      }
+
+      function resetOpportunityForm() {
+        dom.form.reset();
+        dom.date.value = new Date().toISOString().slice(0, 10);
+        renderAssigneeFormOptions();
+      }
+
+      function renderAssigneeFormOptions() {
+        const previous = dom.assignee.value;
+        const options = ['<option value="">Selecciona un miembro</option>']
+          .concat(state.members.map(member =>
+            `<option value="${escapeHtml(member.account)}">${escapeHtml(member.displayName)}</option>`
+          ));
+        dom.assignee.innerHTML = options.join("");
+        if (state.members.some(member => member.account === previous)) {
+          dom.assignee.value = previous;
+        }
+      }
+
+      async function createOpportunity(event) {
+        event.preventDefault();
+        if (!canMutate()) return;
+        clearMessage();
+        setBusy(true);
+        try {
+          const customer = dom.customer.value.trim();
+          const title = dom.project.value.trim();
+          const date = dom.date.value;
+          const account = dom.assignee.value;
+          if (!customer || customer.length > 80) throw new Error("Cliente es obligatorio y admite hasta 80 caracteres.");
+          if (!title || title.length > 120) throw new Error("Proyecto es obligatorio y admite hasta 120 caracteres.");
+          if (!date) throw new Error("La fecha es obligatoria.");
+          if (!STATUSES.includes(dom.newState.value)) throw new Error("El estado seleccionado no es valido.");
+          const budget = validateBudget(dom.budget.value);
+          if (!account) throw new Error("Selecciona una persona del grupo de miembros.");
+          const member = await revalidateMember(account);
+          const assigneeId = await resolveSiteUser(member.account);
+          if (!state.listInfo?.opportunities?.ListItemEntityTypeFullName) {
+            throw new Error("No se conoce el tipo de elemento de la lista; actualiza antes de crear.");
+          }
+          const listType = state.listInfo.opportunities.ListItemEntityTypeFullName;
+          const body = {
+            __metadata: { type: listType },
+            Title: title,
+            Cliente: customer,
+            Presupuesto: budget,
+            Estado: dom.newState.value,
+            Fecha: `${date}T00:00:00Z`,
+            AsignadoAId: assigneeId
+          };
+          const response = await requestApi(
+            apiBaseUrl.href + `${getListPath(CONFIG.LIST_TITLE)}/items`,
+            { method: "POST", body }
+          );
+          const created = unwrap(response.payload);
+          const newId = Number(created?.Id ?? created?.ID) || null;
+          state.needsRefresh = true;
+          state.dataReady = false;
+          render();
+          resetOpportunityForm();
+          try {
+            const refreshResult = await refreshData();
+            state.filter = "Todos";
+            state.highlightedId = newId;
+            render();
+            if (state.authenticated) {
+              setConnectionMessage(`Conectado${state.account?.username ? ` como ${state.account.username}` : ""}`, "online");
+            }
+            setMessage(
+              refreshResult.documentLoadError
+                ? `Oportunidad guardada en SharePoint. ${synchronizationSummary(refreshResult)} La lectura documental fallo; no se muestran documentos anteriores. Pulsa Actualizar documentos. ${describeError(refreshResult.documentLoadError)}`
+                : `Oportunidad guardada en SharePoint. ${synchronizationSummary(refreshResult)}`,
+              refreshResult.documentLoadError ? "warning" : "success"
+            );
+            if (newId) {
+              setTimeout(() => {
+                if (state.highlightedId === newId) {
+                  state.highlightedId = null;
+                  render();
+                }
+              }, 1800);
+            }
+          } catch (refreshError) {
+            handleRequestFailure(refreshError);
+            setMessage(
+              `La oportunidad se guardo en SharePoint, pero fallo la actualizacion de la vista. No repitas el alta; pulsa Actualizar. ${describeError(refreshError)}`,
+              "warning"
+            );
+          }
+        } catch (error) {
+          handleRequestFailure(error);
+          setMessage(describeError(error), "error");
+        } finally {
+          setBusy(false);
+          render();
+        }
+      }
+
+      async function updateOpportunityStatus(opportunity, newStatus) {
+        if (!STATUSES.includes(newStatus) || newStatus === opportunity.status) return;
+        await performOpportunityUpdate(opportunity, { Estado: newStatus }, "estado");
+      }
+
+      async function updateOpportunityAssignee(opportunity, selectedAccount) {
+        if (!selectedAccount || selectedAccount === "__current__") return;
+        await setBusy(true);
+        try {
+          const member = await revalidateMember(selectedAccount);
+          const siteUserId = await resolveSiteUser(member.account);
+          await mergeItem(CONFIG.LIST_TITLE, opportunity.id, {
+            AsignadoAId: siteUserId
+          }, opportunity.etag);
+          state.needsRefresh = true;
+          state.dataReady = false;
+          opportunity.etag = null;
+          render();
+          try {
+            const sync = await refreshData();
+            if (state.authenticated) {
+              setConnectionMessage(`Conectado${state.account?.username ? ` como ${state.account.username}` : ""}`, "online");
+            }
+            const documentMessage = sync.documentLoadError
+              ? ` La lectura documental fallo; no se muestran datos anteriores como actuales. ${describeError(sync.documentLoadError)}`
+              : "";
+            setMessage(
+              `Responsable actualizado en SharePoint. ${synchronizationSummary(sync)}${documentMessage}`,
+              sync.documentLoadError ? "warning" : "success"
+            );
+          } catch (refreshError) {
+            handleRequestFailure(refreshError);
+            if (state.authenticated) {
+              setConnectionMessage("Asignacion guardada; sincronizacion incompleta", "error");
+            }
+            setMessage(
+              `La asignacion de la oportunidad se guardo. No se pudo completar la lectura/sincronizacion posterior; no se revirtio. ${describeError(refreshError)}`,
+              "warning"
+            );
+          }
+        } catch (error) {
+          handleRequestFailure(error);
+          setMessage(describeError(error), "error");
+          const select = dom.content.querySelector(`select[data-action="assignee"][data-id="${opportunity.id}"]`);
+          if (select) {
+            const member = state.members.find(item => item.normalized === normalizedAccount(opportunity.assigneeAccount));
+            select.value = member ? member.account : "__current__";
+          }
+        } finally {
+          setBusy(false);
+          render();
+        }
+      }
+
+      async function performOpportunityUpdate(opportunity, fields, label) {
+        if (!canMutate()) return;
+        setBusy(true);
+        try {
+          await mergeItem(CONFIG.LIST_TITLE, opportunity.id, fields, opportunity.etag);
+          state.needsRefresh = true;
+          state.dataReady = false;
+          opportunity.etag = null;
+          render();
+          try {
+            const refreshResult = await refreshData();
+            if (state.authenticated) {
+              setConnectionMessage(`Conectado${state.account?.username ? ` como ${state.account.username}` : ""}`, "online");
+            }
+            setMessage(
+              refreshResult.documentLoadError
+                ? `Estado actualizado en SharePoint. ${synchronizationSummary(refreshResult)} La lectura documental fallo; no se muestran documentos anteriores. ${describeError(refreshResult.documentLoadError)}`
+                : `Estado actualizado en SharePoint. ${synchronizationSummary(refreshResult)}`,
+              refreshResult.documentLoadError ? "warning" : "success"
+            );
+          } catch (refreshError) {
+            handleRequestFailure(refreshError);
+            if (state.authenticated) {
+              setConnectionMessage(`${label === "estado" ? "Estado" : "Cambio"} guardado; refresco incompleto`, "error");
+            }
+            setMessage(
+              `El cambio se guardo en SharePoint, pero fallo la actualizacion/sincronizacion posterior. No repitas el cambio; pulsa Actualizar. ${describeError(refreshError)}`,
+              "warning"
+            );
+          }
+        } catch (error) {
+          handleRequestFailure(error);
+          setMessage(describeError(error), "error");
+        } finally {
+          setBusy(false);
+          render();
+        }
+      }
+
+      async function deleteOpportunity(opportunity) {
+        if (!canMutate()) return;
+        const confirmed = window.confirm(`¿Eliminar la oportunidad "${opportunity.title}"? Esta accion no se puede deshacer.`);
+        if (!confirmed) return;
+        setBusy(true);
+        try {
+          const related = await readAllPages(
+            apiBaseUrl.href + documentsForOpportunityPath(opportunity.id, "Id")
+          );
+          if (related.length) {
+            setMessage("No se puede eliminar: la oportunidad tiene documentos relacionados. La restriccion de SharePoint tambien protege ante cambios concurrentes.", "error");
+            return;
+          }
+          await deleteItem(CONFIG.LIST_TITLE, opportunity.id, opportunity.etag);
+          state.needsRefresh = true;
+          state.dataReady = false;
+          opportunity.etag = null;
+          render();
+          try {
+            const refreshResult = await refreshData();
+            if (state.authenticated) {
+              setConnectionMessage(`Conectado${state.account?.username ? ` como ${state.account.username}` : ""}`, "online");
+            }
+            setMessage(
+              refreshResult.documentLoadError
+                ? `Oportunidad eliminada de SharePoint. ${synchronizationSummary(refreshResult)} La lectura documental fallo. ${describeError(refreshResult.documentLoadError)}`
+                : `Oportunidad eliminada de SharePoint. ${synchronizationSummary(refreshResult)}`,
+              refreshResult.documentLoadError ? "warning" : "success"
+            );
+          } catch (refreshError) {
+            handleRequestFailure(refreshError);
+            setConnectionMessage("Eliminacion guardada; refresco incompleto", "error");
+            setMessage(
+              `La eliminacion se confirmo en SharePoint, pero fallo la actualizacion de la vista. No repitas la eliminacion; pulsa Actualizar. ${describeError(refreshError)}`,
+              "warning"
+            );
+          }
+        } catch (error) {
+          handleRequestFailure(error);
+          setMessage(describeError(error), "error");
+        } finally {
+          setBusy(false);
+          render();
+        }
+      }
+
+      function openDocumentReview(item) {
+        if (!item?.hasAttachment || !state.documentsReady || state.documentsNeedRefresh) return;
+        state.selectedDocumentId = item.id;
+        dom.reviewForm.reset();
+        dom.reviewStatus.value = VALIDATION_STATUSES.includes(item.validationStatus)
+          ? item.validationStatus
+          : "";
+        dom.reviewObservations.value = item.observations;
+        if (!VALIDATION_STATUSES.includes(item.validationStatus)) {
+          setDocumentMessage(
+            `El documento ${item.id} tiene un estado no reconocido. Selecciona un estado valido antes de guardar.`,
+            "error"
+          );
+        } else {
+          clearDocumentMessage();
+        }
+        render();
+        dom.reviewStatus.focus();
+      }
+
+      async function uploadDocument(event) {
+        event.preventDefault();
+        if (!canMutate()) return;
+        const selectedOpportunityId = state.selectedDocumentOpportunityId;
+        let file;
+        let fileName;
+        let bytes;
+        let documentId = null;
+        setBusy(true);
+        clearDocumentMessage();
+        try {
+          if (selectedOpportunityId === null || !state.documentsReady || state.documentsNeedRefresh) {
+            throw new Error("Selecciona una oportunidad y actualiza sus documentos antes de cargar.");
+          }
+          file = dom.documentFile.files?.[0] || null;
+          fileName = validateDocumentFile(file);
+          bytes = await file.arrayBuffer();
+          if (bytes.byteLength !== file.size) {
+            throw new Error("No se pudieron leer todos los bytes del archivo.");
+          }
+          dom.documentFile.value = "";
+
+          const currentData = await refreshData();
+          if (!state.dataReady || !state.documentsReady || state.documentsNeedRefresh) {
+            const detail = currentData.documentLoadError
+              ? ` ${describeError(currentData.documentLoadError)}`
+              : "";
+            throw new Error(`No se pudo confirmar la lectura actual de oportunidades y documentos; no se creo ningun registro nuevo.${detail}`);
+          }
+          const opportunity = state.opportunities.find(item => item.id === selectedOpportunityId);
+          if (!opportunity) {
+            throw new Error("La oportunidad seleccionada ya no existe en la lectura actual.");
+          }
+          const entityType = state.listInfo?.documents?.ListItemEntityTypeFullName;
+          if (!entityType) {
+            throw new Error("No se conoce el tipo de elemento de la lista documental.");
+          }
+
+          let metadataResponse;
+          let metadataRequestStarted = false;
+          try {
+            metadataResponse = await createDocumentWithCurrentAssignment({
+              opportunityId: opportunity.id,
+              readOpportunity: id => readItem(
+                CONFIG.LIST_TITLE,
+                id,
+                "$select=Id,AsignadoAId"
+              ),
+              createDocument: assigneeId => {
+                metadataRequestStarted = true;
+                return requestApi(
+                  apiBaseUrl.href + `${getListPath(CONFIG.DOCUMENTS_LIST_TITLE)}/items`,
+                  {
+                    method: "POST",
+                    headers: {
+                      Accept: "application/json;odata=verbose",
+                      "Content-Type": "application/json;odata=verbose"
+                    },
+                    body: {
+                      __metadata: { type: entityType },
+                      Title: fileName,
+                      OportunidadId: opportunity.id,
+                      AsignadoAId: assigneeId,
+                      EstadoValidacion: "Pendiente",
+                      Observaciones: "",
+                      ValidadoPor: null,
+                      FechaValidacion: null
+                    }
+                  }
+                );
+              }
+            });
+          } catch (error) {
+            if (!metadataRequestStarted) throw error;
+            invalidateDocumentData(true);
+            const reload = await loadDocumentsForOpportunity(selectedOpportunityId);
+            setDocumentMessage(
+              `No se pudo confirmar si SharePoint creo el registro documental. Verifica la lista antes de intentar otra carga. ${describeError(error)}${reload.error ? ` No se pudo actualizar la lista: ${describeError(reload.error)}` : ""}`,
+              "warning"
+            );
+            return;
+          }
+
+          const created = unwrap(metadataResponse.payload);
+          documentId = Number(created?.Id ?? created?.ID);
+          if (!Number.isSafeInteger(documentId) || documentId <= 0) {
+            invalidateDocumentData(true);
+            const reload = await loadDocumentsForOpportunity(selectedOpportunityId);
+            setDocumentMessage(
+              `SharePoint respondio a la creacion, pero no devolvio un ID documental verificable. No vuelvas a cargar este archivo hasta comprobar la lista.${reload.error ? ` ${describeError(reload.error)}` : ""}`,
+              "warning"
+            );
+            return;
+          }
+
+          const uploadResult = await uploadAttachmentWithCompensation(
+            documentId,
+            id => requestApi(
+              apiBaseUrl.href + attachmentPath(id, fileName, "add"),
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/octet-stream" },
+                body: bytes
+              }
+            ),
+            compensateDocumentCreation
+          );
+          if (!uploadResult.uploaded) {
+            invalidateDocumentData(true);
+            if (!uploadResult.cleanupConfirmed) {
+              setDocumentMessage(
+                `Fallo la carga del archivo y no se pudo confirmar la limpieza del registro provisional ${documentId}. Verifica ese ID antes de reintentar. Error de carga: ${describeError(uploadResult.error)} Error de limpieza/verificacion: ${describeError(uploadResult.cleanupError)}`,
+                "error"
+              );
+              return;
+            }
+            const reload = await loadDocumentsForOpportunity(selectedOpportunityId);
+            setDocumentMessage(
+              `El binario no se cargo. Se confirmo la eliminacion del registro provisional ${documentId}. ${describeError(uploadResult.error)}${reload.error ? ` La lectura posterior tambien fallo: ${describeError(reload.error)}` : ""}`,
+              reload.error ? "warning" : "error"
+            );
+            return;
+          }
+
+          invalidateDocumentData(true);
+          const reload = await loadDocumentsForOpportunity(selectedOpportunityId);
+          if (reload.error) {
+            setDocumentMessage(
+              `El archivo y sus metadatos se guardaron en SharePoint (documento ${documentId}), pero fallo la lectura posterior. No repitas la carga; pulsa Actualizar documentos. ${describeError(reload.error)}`,
+              "warning"
+            );
+          } else {
+            setDocumentMessage(`Documento guardado y confirmado en SharePoint (ID ${documentId}).`, "success");
+          }
+        } catch (error) {
+          handleRequestFailure(error);
+          setDocumentMessage(describeError(error), "error");
+        } finally {
+          setBusy(false);
+          render();
+        }
+      }
+
+      async function downloadDocument(item) {
+        if (!item?.hasAttachment || !state.documentsReady ||
+            state.documentsNeedRefresh || state.busy) return;
+        setBusy(true);
+        clearDocumentMessage();
+        try {
+          const blob = await authorizedBlobFetch(
+            apiBaseUrl.href + attachmentPath(item.id, item.fileName, "download")
+          );
+          const objectUrl = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = objectUrl;
+          link.download = item.fileName;
+          link.rel = "noopener";
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+          setDocumentMessage(`Descarga iniciada: ${item.fileName}`, "success");
+        } catch (error) {
+          handleRequestFailure(error);
+          setDocumentMessage(describeError(error), "error");
+        } finally {
+          setBusy(false);
+          render();
+        }
+      }
+
+      async function saveDocumentReview(event) {
+        event.preventDefault();
+        if (!canMutate() || !state.documentsReady || state.documentsNeedRefresh) return;
+        const item = selectedDocument();
+        if (!item?.hasAttachment) return;
+        let review;
+        try {
+          review = validateDocumentReview(
+            dom.reviewStatus.value,
+            dom.reviewObservations.value,
+            VALIDATION_STATUSES
+          );
+        } catch (error) {
+          setDocumentMessage(error.message, "error");
+          if (dom.reviewStatus.value === "Rechazado" && !dom.reviewObservations.value.trim()) {
+            dom.reviewObservations.focus();
+          }
+          return;
+        }
+        const validationStatus = review.status;
+        const observations = review.observations;
+
+        const selectedOpportunityId = state.selectedDocumentOpportunityId;
+        let reviewerAccount = "";
+        setBusy(true);
+        clearDocumentMessage();
+        try {
+          if (validationStatus !== "Pendiente") {
+            const currentUser = await readCurrentSharePointUser();
+            reviewerAccount = currentUser.account;
+          }
+          const fields = buildDocumentReviewFields(
+            validationStatus,
+            observations,
+            VALIDATION_STATUSES,
+            reviewerAccount
+          );
+
+          await mergeItem(CONFIG.DOCUMENTS_LIST_TITLE, item.id, fields, item.etag);
+          invalidateDocumentData(true);
+          const reload = await loadDocumentsForOpportunity(selectedOpportunityId);
+          if (reload.error) {
+            setDocumentMessage(
+              `La revision se guardo en SharePoint, pero fallo la lectura posterior. No repitas el cambio; pulsa Actualizar documentos. ${describeError(reload.error)}`,
+              "warning"
+            );
+          } else {
+            setDocumentMessage(
+              validationStatus === "Pendiente"
+                ? "Revision guardada en Pendiente; se limpiaron la cuenta y la fecha de validacion."
+                : `Revision manual guardada en SharePoint por ${reviewerAccount}; fecha registrada en UTC.`,
+              "success"
+            );
+          }
+        } catch (error) {
+          handleRequestFailure(error);
+          invalidateDocumentData(true);
+          setDocumentMessage(
+            `No se pudo confirmar la revision. Actualiza los documentos antes de volver a intentarlo. ${describeError(error)}`,
+            "error"
+          );
+        } finally {
+          setBusy(false);
+          render();
+        }
+      }
+
+      async function deleteDocument(item) {
+        if (!canMutate() || !state.documentsReady || state.documentsNeedRefresh) return;
+        const name = item.fileName || item.title || `documento ${item.id}`;
+        if (!window.confirm(`¿Eliminar "${name}" y su elemento documental? Esta accion no se puede deshacer.`)) {
+          return;
+        }
+        const selectedOpportunityId = state.selectedDocumentOpportunityId;
+        setBusy(true);
+        clearDocumentMessage();
+        try {
+          await deleteItem(CONFIG.DOCUMENTS_LIST_TITLE, item.id, item.etag);
+          invalidateDocumentData(true);
+          const reload = await loadDocumentsForOpportunity(selectedOpportunityId);
+          if (reload.error) {
+            setDocumentMessage(
+              `La eliminacion del documento ${item.id} se confirmo en SharePoint, pero fallo la lectura posterior. No repitas la eliminacion; pulsa Actualizar documentos. ${describeError(reload.error)}`,
+              "warning"
+            );
+          } else {
+            setDocumentMessage(`Documento eliminado de SharePoint: ${name}.`, "success");
+          }
+        } catch (error) {
+          handleRequestFailure(error);
+          invalidateDocumentData(true);
+          setDocumentMessage(
+            `No se pudo confirmar la eliminacion del documento ${item.id}. Actualiza documentos antes de volver a intentarlo. ${describeError(error)}`,
+            "error"
+          );
+        } finally {
+          setBusy(false);
+          render();
+        }
+      }
+
+      function selectDocumentsOpportunity(opportunity) {
+        state.selectedDocumentOpportunityId = opportunity.id;
+        invalidateDocumentData(true);
+        renderDocumentOpportunityOptions();
+        render();
+        document.getElementById("documents-panel").scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          block: "start"
+        });
+        loadDocumentsForOpportunity(opportunity.id);
+      }
+
+      async function handleDocumentClick(event) {
+        const button = event.target.closest("button[data-document-action]");
+        if (!button || state.busy || !state.documentsReady || state.documentsNeedRefresh) return;
+        const item = state.documentItems.find(documentItem =>
+          documentItem.id === Number(button.dataset.id)
+        );
+        if (!item) return;
+        if (button.dataset.documentAction === "review") {
+          openDocumentReview(item);
+        } else if (button.dataset.documentAction === "download") {
+          await downloadDocument(item);
+        } else if (button.dataset.documentAction === "delete") {
+          await deleteDocument(item);
+        }
+      }
+
+      async function handleContentClick(event) {
+        const button = event.target.closest("button[data-action]");
+        if (!button || !state.dataReady || state.busy) return;
+        const id = Number(button.dataset.id);
+        const opportunity = state.opportunities.find(item => item.id === id);
+        if (!opportunity) return;
+        if (button.dataset.action === "documents") {
+          selectDocumentsOpportunity(opportunity);
+        } else if (button.dataset.action === "delete") {
+          await deleteOpportunity(opportunity);
+        }
+      }
+
+      async function handleContentChange(event) {
+        const select = event.target.closest("select[data-action]");
+        if (!select || !canMutate()) return;
+        const opportunity = state.opportunities.find(item => item.id === Number(select.dataset.id));
+        if (!opportunity) return;
+        if (select.dataset.action === "status") {
+          await updateOpportunityStatus(opportunity, select.value);
+        } else if (select.dataset.action === "assignee") {
+          await updateOpportunityAssignee(opportunity, select.value);
+        }
+      }
+
+      function setView(view) {
+        if (view !== "table" && view !== "cards") return;
+        state.view = view;
+        persistPreference("vista", view);
+        render();
+      }
+
+      function appStartup() {
+        restorePreferences();
+        dom.currentDate.textContent = longDateFormatter.format(new Date());
+        dom.date.value = new Date().toISOString().slice(0, 10);
+        dom.form.addEventListener("submit", createOpportunity);
+        dom.connect.addEventListener("click", connect);
+        dom.refresh.addEventListener("click", manualRefresh);
+        dom.refreshDocuments.addEventListener("click", manualRefresh);
+        dom.documentOpportunity.addEventListener("change", () => {
+          const value = Number(dom.documentOpportunity.value);
+          state.selectedDocumentOpportunityId =
+            Number.isSafeInteger(value) && value > 0 ? value : null;
+          invalidateDocumentData(false);
+          render();
+          if (state.selectedDocumentOpportunityId !== null) {
+            loadDocumentsForOpportunity(state.selectedDocumentOpportunityId);
+          }
+        });
+        dom.documentUploadForm.addEventListener("submit", uploadDocument);
+        dom.reviewForm.addEventListener("submit", saveDocumentReview);
+        dom.documentsContent.addEventListener("click", event => {
+          handleDocumentClick(event).catch(error => {
+            handleRequestFailure(error);
+            setDocumentMessage(describeError(error), "error");
+          });
+        });
+        dom.filters.addEventListener("click", event => {
+          const filter = event.target.closest("button[data-filter]");
+          if (!filter || !state.dataReady || state.busy) return;
+          state.filter = filter.dataset.filter;
+          render();
+        });
+        dom.content.addEventListener("click", event => {
+          handleContentClick(event).catch(error => {
+            handleRequestFailure(error);
+            setMessage(describeError(error), "error");
+          });
+        });
+        dom.content.addEventListener("change", event => {
+          handleContentChange(event).catch(error => {
+            handleRequestFailure(error);
+            setMessage(describeError(error), "error");
+          });
+        });
+        dom.viewTable.addEventListener("click", () => setView("table"));
+        dom.viewCards.addEventListener("click", () => setView("cards"));
+        dom.clientId.addEventListener("change", () => {
+          const value = currentClientId();
+          if (!GUID_PATTERN.test(value)) {
+            setMessage("El ID de aplicacion debe ser un GUID valido.", "error");
+            return;
+          }
+          if (value.toLowerCase() !== state.clientId.toLowerCase()) {
+            state.clientId = value;
+            if (state.authenticated) {
+              state.authenticated = false;
+              state.account = null;
+              clearSnapshot();
+              setConnectionMessage("Vuelve a conectar con el ID de aplicacion actualizado.", "");
+              render();
+            }
+          }
+        });
+        render();
+        initializeOnLoad().catch(error => {
+          state.busy = false;
+          setConnectionMessage("Autenticacion no disponible", "error");
+          setMessage(describeError(error), "error");
+          render();
+        });
+      }
+
+      appStartup();
+    })();
+  </script>
+</body>
+</html>
